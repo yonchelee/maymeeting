@@ -1,0 +1,2249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MASTER BOX 설계 계산기</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+<style>
+  :root{
+    /* yonchelee.com Apple-inspired palette */
+    --bg:#FFFFFF;
+    --bg-soft:#F5F5F7;
+    --bg-card:#FFFFFF;
+    --ink:#1D1D1F;
+    --ink-2:#424245;
+    --ink-3:#6E6E73;
+    --ink-4:#86868B;
+    --hairline:#D2D2D7;
+    --hairline-soft:#E8E8ED;
+
+    /* Apple Intelligence gradient (accent only for YL. logo / heading em) */
+    --accent: linear-gradient(100deg,#FF6A00 0%,#EE0979 35%,#B63CE1 70%,#4F46E5 100%);
+    --accent-soft: linear-gradient(100deg,rgba(255,106,0,.08),rgba(238,9,121,.08),rgba(182,60,225,.08),rgba(79,70,229,.08));
+
+    /* Functional */
+    --primary:#1D1D1F;
+    --primary-hover:#000;
+    --primary-ink:#FFF;
+
+    --radius:12px;
+    --radius-sm:8px;
+    --radius-xs:6px;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.04);
+    --shadow:0 4px 16px rgba(0,0,0,.06);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,Roboto,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    font-size:15px;
+    line-height:1.55;
+    letter-spacing:-0.01em;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    min-height:100vh;
+  }
+
+  .wrap{max-width:1200px;margin:0 auto;padding:48px 24px 96px}
+
+  /* Site nav (matches yonchelee.com) */
+  nav.site{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:20px 24px;max-width:1200px;margin:0 auto;
+    border-bottom:1px solid var(--hairline-soft);
+  }
+  nav.site .logo{
+    font-size:22px;font-weight:800;letter-spacing:-0.03em;
+    background:var(--accent);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent;
+    text-decoration:none;
+  }
+  nav.site .links{display:flex;gap:28px}
+  nav.site .links a{
+    color:var(--ink-2);font-size:14px;font-weight:500;
+    text-decoration:none;letter-spacing:-0.01em;
+    transition:color .15s ease;
+  }
+  nav.site .links a:hover{color:var(--ink)}
+
+  header.page{padding:40px 0 36px;border-bottom:1px solid var(--hairline-soft);margin-bottom:36px}
+  header.page .eyebrow{
+    font-size:12px;letter-spacing:.12em;color:var(--ink-3);
+    text-transform:uppercase;font-weight:600;
+  }
+  header.page h1{
+    font-size:clamp(32px,5vw,48px);
+    font-weight:800;
+    margin-top:10px;
+    color:var(--ink);
+    letter-spacing:-0.035em;
+    line-height:1.1;
+  }
+  header.page h1 em{
+    font-style:normal;
+    background:var(--accent);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;color:transparent;
+  }
+  header.page p{color:var(--ink-3);margin-top:14px;font-size:15px;max-width:720px;line-height:1.6}
+  header.page p b{color:var(--ink);font-weight:600}
+
+  .grid{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:24px}
+  @media (max-width:960px){.grid{grid-template-columns:1fr}}
+
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--hairline);
+    border-radius:var(--radius);
+    padding:28px;
+  }
+  .card h2{
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-3);font-weight:700;margin-bottom:20px;
+  }
+
+  .mode-label{
+    font-size:11px;color:var(--ink-3);letter-spacing:.12em;
+    text-transform:uppercase;font-weight:600;margin-bottom:10px;
+  }
+  .mode-tabs{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;
+  }
+  .mode-tab{
+    background:var(--bg);
+    border:1px solid var(--hairline);
+    border-radius:var(--radius-sm);
+    padding:14px 14px 12px;
+    cursor:pointer;
+    transition:all .15s ease;
+    font-family:inherit;
+    text-align:left;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .mode-tab:hover{border-color:var(--ink-4)}
+  .mode-tab.active{
+    border-color:var(--ink);
+    background:var(--bg-soft);
+  }
+  .mode-tab .mt-head{display:flex;align-items:center;justify-content:space-between}
+  .mode-tab .mt-title{
+    font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-0.01em;
+  }
+  .mode-tab .mt-check{
+    width:16px;height:16px;border-radius:50%;
+    border:1.5px solid var(--hairline);
+    display:flex;align-items:center;justify-content:center;
+    transition:all .15s ease;flex-shrink:0;
+  }
+  .mode-tab.active .mt-check{border-color:var(--ink);background:var(--ink)}
+  .mode-tab .mt-check::after{
+    content:"";width:6px;height:6px;border-radius:50%;background:#FFF;
+    opacity:0;transition:opacity .15s ease;
+  }
+  .mode-tab.active .mt-check::after{opacity:1}
+  .mode-tab .mt-diagram{
+    background:#FAFAFA;border:1px solid var(--hairline-soft);border-radius:6px;
+    padding:8px 10px 4px;
+  }
+  .mode-tab .mt-diagram svg{width:100%;height:auto;display:block}
+  .mode-tab .mt-desc{font-size:11px;color:var(--ink-3);line-height:1.5}
+  .mode-tab.active .mt-desc{color:var(--ink-2)}
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field.full{grid-column:1 / -1}
+  .field label{
+    font-size:12px;color:var(--ink-2);
+    display:flex;justify-content:space-between;align-items:center;
+    font-weight:500;
+  }
+  .field label .unit{color:var(--ink-4);font-size:11px}
+  .field input[type="number"]{
+    background:var(--bg);
+    border:1px solid var(--hairline);
+    color:var(--ink);
+    font-family:inherit;font-size:15px;font-weight:500;
+    padding:11px 13px;border-radius:var(--radius-sm);
+    transition:border-color .12s ease, box-shadow .12s ease;width:100%;
+    font-variant-numeric:tabular-nums;
+  }
+  .field input[type="number"]:focus{
+    outline:none;border-color:var(--ink);
+    box-shadow:0 0 0 3px rgba(29,29,31,.08);
+  }
+  .field input[type="number"]::-webkit-inner-spin-button,
+  .field input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+
+  details.advanced{
+    margin-top:18px;border-top:1px solid var(--hairline-soft);padding-top:16px;
+  }
+  details.advanced summary{
+    cursor:pointer;font-size:12px;color:var(--ink-3);
+    letter-spacing:.08em;text-transform:uppercase;font-weight:600;
+    user-select:none;list-style:none;display:flex;align-items:center;gap:8px;
+  }
+  details.advanced summary::-webkit-details-marker{display:none}
+  details.advanced summary::before{content:"▸";color:var(--ink-4);transition:transform .15s ease;display:inline-block}
+  details.advanced[open] summary::before{transform:rotate(90deg)}
+  details.advanced .row{margin-top:14px}
+
+  .calc-btn{
+    width:100%;margin-top:24px;
+    background:var(--primary);
+    color:var(--primary-ink);
+    border:1px solid var(--primary);
+    border-radius:var(--radius-sm);
+    padding:14px 20px;
+    font-family:inherit;font-size:15px;font-weight:600;
+    cursor:pointer;
+    letter-spacing:-0.01em;
+    transition:all .15s ease;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+  }
+  .calc-btn:hover{background:var(--primary-hover);transform:translateY(-1px);box-shadow:var(--shadow)}
+  .calc-btn:active{transform:translateY(0)}
+
+  .stale-note{
+    margin-top:10px;padding:10px 14px;font-size:12.5px;
+    background:var(--accent-soft);
+    border:1px solid transparent;
+    border-radius:var(--radius-sm);
+    color:var(--ink);
+    display:none;align-items:center;gap:8px;
+  }
+  .stale-note.show{display:flex}
+  .stale-note::before{
+    content:"";width:6px;height:6px;border-radius:50%;
+    background:#EE0979;
+    flex-shrink:0;animation:pulse 1.6s infinite ease-in-out;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:.5;transform:scale(.85)}
+  }
+
+  .result-main{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;
+  }
+  .stat{
+    background:var(--bg-soft);
+    border:1px solid var(--hairline-soft);
+    border-radius:var(--radius-sm);
+    padding:14px 16px;
+  }
+  .stat .k{font-size:11px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+  .stat .v{
+    font-size:26px;font-weight:700;margin-top:4px;
+    font-variant-numeric:tabular-nums;letter-spacing:-0.02em;
+    color:var(--ink);
+  }
+  .stat.empty .v{color:var(--ink-4);opacity:.5}
+  .stat .u{font-size:12px;color:var(--ink-3);margin-left:3px;font-weight:500}
+
+  .sub-label{font-size:11px;color:var(--ink-3);letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-bottom:10px}
+  .result-sub{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+  .stat.sub .v{font-size:20px;color:var(--ink-2)}
+  .stat.sub.empty .v{color:var(--ink-4);opacity:.5}
+
+  .formula{
+    background:var(--bg-soft);border:1px solid var(--hairline-soft);border-radius:var(--radius-sm);
+    padding:14px 16px;margin-bottom:20px;font-size:13px;
+    font-family:'JetBrains Mono','SF Mono',ui-monospace,monospace;
+    color:var(--ink-2);line-height:1.8;min-height:80px;
+  }
+  .formula.empty{
+    color:var(--ink-4);font-style:italic;font-family:inherit;
+    display:flex;align-items:center;justify-content:center;
+    text-align:center;font-size:13px;
+  }
+  .formula .name{color:var(--ink);font-weight:700;margin-right:6px}
+  .formula .eq{color:var(--ink-4);margin:0 6px}
+  .formula .num{color:var(--ink);font-variant-numeric:tabular-nums}
+  .formula .res{color:#B63CE1;font-weight:700;font-variant-numeric:tabular-nums}
+
+  .preview-wrap{
+    background:#FAFAFA;border:1px solid var(--hairline);border-radius:var(--radius-sm);
+    padding:16px;margin-bottom:20px;
+    cursor:zoom-in;
+    position:relative;
+    transition:border-color .15s ease;
+  }
+  .preview-wrap:hover{border-color:var(--ink-4)}
+  .preview-wrap::after{
+    content:'🔍 클릭하여 확대';
+    position:absolute;top:12px;right:16px;
+    font-size:11px;color:var(--ink-3);
+    background:rgba(255,255,255,0.9);
+    padding:4px 10px;border-radius:12px;
+    border:1px solid var(--hairline-soft);
+    pointer-events:none;
+    opacity:0;transition:opacity .15s ease;
+  }
+  .preview-wrap:hover::after{opacity:1}
+  .preview-wrap canvas{display:block;width:100%;height:auto;max-height:540px}
+
+  /* Lightbox (도면 확대) */
+  .lightbox{
+    position:fixed;inset:0;z-index:100;
+    background:rgba(0,0,0,0.85);
+    backdrop-filter:blur(6px);
+    display:none;align-items:center;justify-content:center;
+    padding:20px;
+    cursor:zoom-out;
+  }
+  .lightbox.show{display:flex}
+  .lightbox-inner{
+    position:relative;
+    width:100%;height:100%;
+    max-width:1800px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:default;
+  }
+  .lightbox-content{
+    background:#FAFAFA;
+    border-radius:var(--radius);
+    padding:20px;
+    max-width:100%;max-height:100%;
+    overflow:hidden;
+    position:relative;
+    cursor:grab;
+  }
+  .lightbox-content.grabbing{cursor:grabbing}
+  .lightbox-canvas-wrap{
+    position:relative;
+    overflow:auto;
+    max-width:100%;max-height:calc(100vh - 120px);
+    background:#FAFAFA;
+  }
+  #lightboxCanvas{display:block;transform-origin:top left;transition:transform .18s ease}
+  .lightbox-close{
+    position:absolute;top:-44px;right:0;
+    width:36px;height:36px;
+    background:rgba(255,255,255,0.15);
+    border:1px solid rgba(255,255,255,0.3);
+    border-radius:50%;color:#FFF;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;font-weight:300;
+    transition:all .15s ease;
+  }
+  .lightbox-close:hover{background:rgba(255,255,255,0.25);transform:scale(1.05)}
+  .lightbox-controls{
+    position:absolute;top:-44px;right:48px;
+    display:flex;gap:6px;
+  }
+  .lightbox-ctrl{
+    width:36px;height:36px;
+    background:rgba(255,255,255,0.15);
+    border:1px solid rgba(255,255,255,0.3);
+    border-radius:50%;color:#FFF;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .15s ease;
+  }
+  .lightbox-ctrl:hover{background:rgba(255,255,255,0.25);transform:scale(1.05)}
+  .lightbox-zoom-label{
+    position:absolute;top:-38px;left:50%;transform:translateX(-50%);
+    color:rgba(255,255,255,0.7);font-size:12px;font-weight:500;
+    padding:4px 12px;background:rgba(255,255,255,0.1);
+    border-radius:12px;
+    min-width:64px;text-align:center;
+  }
+  .preview-empty{
+    min-height:340px;background:var(--bg-soft);border:1px dashed var(--hairline);
+    border-radius:var(--radius-sm);margin-bottom:20px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-3);font-size:13px;padding:20px;text-align:center;
+  }
+  .preview-empty .icon{font-size:32px;margin-bottom:10px;opacity:.4;display:block}
+
+  /* 3D Visualization */
+  .viz-wrap{
+    position:relative;
+    background:linear-gradient(180deg,#F8F8FB 0%,#EFEFF4 100%);
+    border:1px solid var(--hairline);
+    border-radius:var(--radius-sm);
+    margin-bottom:20px;
+    overflow:hidden;
+  }
+  #viz3d{
+    width:100%;height:380px;
+    display:block;
+    cursor:grab;
+    touch-action:none;
+  }
+  #viz3d:active{cursor:grabbing}
+  #viz3d canvas{display:block;width:100%!important;height:100%!important}
+  .viz-controls{
+    position:absolute;top:10px;right:10px;z-index:2;
+    display:flex;gap:4px;
+    background:rgba(255,255,255,0.9);
+    backdrop-filter:blur(8px);
+    border:1px solid var(--hairline);
+    border-radius:var(--radius-sm);padding:4px;
+  }
+  .viz-btn{
+    width:30px;height:30px;
+    background:transparent;border:none;
+    border-radius:4px;cursor:pointer;
+    color:var(--ink-2);
+    display:flex;align-items:center;justify-content:center;
+    transition:all .15s ease;
+    font-family:inherit;
+  }
+  .viz-btn:hover{background:var(--bg-soft);color:var(--ink)}
+  .viz-btn.active{background:var(--ink);color:#FFF}
+  .viz-legend{
+    position:absolute;bottom:10px;left:10px;z-index:2;
+    display:flex;gap:14px;
+    background:rgba(255,255,255,0.85);
+    backdrop-filter:blur(8px);
+    border:1px solid var(--hairline);
+    border-radius:var(--radius-sm);padding:6px 10px;
+    font-size:11px;color:var(--ink-2);font-weight:500;
+  }
+  .viz-lgd-item{display:flex;align-items:center;gap:6px}
+  .viz-dot{width:10px;height:10px;border-radius:2px;display:inline-block}
+  .viz-empty{
+    min-height:240px;background:var(--bg-soft);border:1px dashed var(--hairline);
+    border-radius:var(--radius-sm);margin-bottom:20px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-3);font-size:13px;padding:20px;text-align:center;
+  }
+  .viz-empty .icon{font-size:32px;margin-bottom:10px;opacity:.4;display:block}
+
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{
+    font-family:inherit;font-size:14px;font-weight:600;
+    padding:12px 20px;border-radius:var(--radius-sm);
+    border:1px solid transparent;cursor:pointer;
+    transition:all .15s ease;display:inline-flex;align-items:center;gap:8px;
+    letter-spacing:-0.01em;
+  }
+  .btn.primary{
+    background:var(--primary);color:var(--primary-ink);border-color:var(--primary);
+  }
+  .btn.primary:hover:not(:disabled){background:var(--primary-hover);transform:translateY(-1px);box-shadow:var(--shadow)}
+  .btn.ghost{
+    background:var(--bg);color:var(--ink);border-color:var(--hairline);
+  }
+  .btn.ghost:hover:not(:disabled){border-color:var(--ink);background:var(--bg-soft)}
+  .btn:active{transform:translateY(0)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+
+  .note{
+    font-size:12.5px;color:var(--ink-2);margin-top:16px;
+    padding:14px 16px;background:var(--bg-soft);
+    border-radius:var(--radius-sm);line-height:1.7;
+  }
+  .note b{color:var(--ink);font-weight:600}
+
+  footer.site{
+    margin-top:56px;padding-top:24px;
+    border-top:1px solid var(--hairline-soft);
+    color:var(--ink-4);font-size:12.5px;text-align:center;
+    max-width:1200px;margin-left:auto;margin-right:auto;
+  }
+  footer.site a{color:var(--ink-3);text-decoration:none}
+  footer.site a:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<nav class="site">
+  <a class="logo" href="https://yonchelee.com">YL.</a>
+  <div class="links">
+    <a href="https://yonchelee.com/masterclass">스터디</a>
+    <a href="https://yonchelee.com/agent-practice">예제</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="page">
+    <div class="eyebrow">MASTER BOX DESIGN</div>
+    <h1>마스터박스 <em>설계 계산기</em></h1>
+    <p>배열 방식과 유닛박스 규격, <b>총 적재 개수</b>를 입력하고 계산하기를 누르면 마스터박스(L·W·H)와 십자패드 치수를 산출하고 도면을 PDF로 출력합니다.</p>
+  </header>
+
+  <div class="grid">
+    <!-- 입력 -->
+    <section class="card">
+      <h2>입력</h2>
+
+      <div class="mode-label">배열 방식 선택</div>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" data-mode="2xN" role="tab" type="button">
+          <div class="mt-head">
+            <div class="mt-title">2 × N 배열</div>
+            <div class="mt-check"></div>
+          </div>
+          <div class="mt-diagram">
+            <svg viewBox="0 0 180 72" preserveAspectRatio="xMidYMid meet">
+              <rect x="3" y="3" width="174" height="58" rx="3" fill="none" stroke="#86868B" stroke-width="1.2"/>
+              <g fill="rgba(29,29,31,0.06)" stroke="#1D1D1F" stroke-width="0.8">
+                <rect x="10" y="10" width="24" height="20" rx="1.5"/>
+                <rect x="37" y="10" width="24" height="20" rx="1.5"/>
+                <rect x="64" y="10" width="24" height="20" rx="1.5"/>
+                <rect x="91" y="10" width="24" height="20" rx="1.5"/>
+                <rect x="118" y="10" width="24" height="20" rx="1.5"/>
+                <rect x="145" y="10" width="24" height="20" rx="1.5"/>
+              </g>
+              <g fill="rgba(29,29,31,0.06)" stroke="#1D1D1F" stroke-width="0.8">
+                <rect x="10" y="34" width="24" height="20" rx="1.5"/>
+                <rect x="37" y="34" width="24" height="20" rx="1.5"/>
+                <rect x="64" y="34" width="24" height="20" rx="1.5"/>
+                <rect x="91" y="34" width="24" height="20" rx="1.5"/>
+                <rect x="118" y="34" width="24" height="20" rx="1.5"/>
+                <rect x="145" y="34" width="24" height="20" rx="1.5"/>
+              </g>
+              <g stroke="#6E6E73" stroke-width="0.6" fill="none">
+                <line x1="10" y1="65" x2="169" y2="65"/>
+                <line x1="10" y1="63" x2="10" y2="67"/>
+                <line x1="169" y1="63" x2="169" y2="67"/>
+              </g>
+              <text x="90" y="70" fill="#6E6E73" font-size="5.5" text-anchor="middle" font-family="Pretendard Variable,sans-serif" font-weight="600">L 방향 · 한 열당 N개</text>
+            </svg>
+          </div>
+          <div class="mt-desc">2열 배열 · 한 열당 개수 = ⌈총 개수 ÷ 2⌉</div>
+        </button>
+
+        <button class="mode-tab" data-mode="1xN" role="tab" type="button">
+          <div class="mt-head">
+            <div class="mt-title">1 × N 배열</div>
+            <div class="mt-check"></div>
+          </div>
+          <div class="mt-diagram">
+            <svg viewBox="0 0 180 72" preserveAspectRatio="xMidYMid meet">
+              <rect x="3" y="14" width="174" height="38" rx="3" fill="none" stroke="#86868B" stroke-width="1.2"/>
+              <g fill="rgba(29,29,31,0.06)" stroke="#1D1D1F" stroke-width="0.8">
+                <rect x="10" y="22" width="24" height="22" rx="1.5"/>
+                <rect x="37" y="22" width="24" height="22" rx="1.5"/>
+                <rect x="64" y="22" width="24" height="22" rx="1.5"/>
+                <rect x="91" y="22" width="24" height="22" rx="1.5"/>
+                <rect x="118" y="22" width="24" height="22" rx="1.5"/>
+                <rect x="145" y="22" width="24" height="22" rx="1.5"/>
+              </g>
+              <g stroke="#6E6E73" stroke-width="0.6" fill="none">
+                <line x1="10" y1="65" x2="169" y2="65"/>
+                <line x1="10" y1="63" x2="10" y2="67"/>
+                <line x1="169" y1="63" x2="169" y2="67"/>
+              </g>
+              <text x="90" y="70" fill="#6E6E73" font-size="5.5" text-anchor="middle" font-family="Pretendard Variable,sans-serif" font-weight="600">L 방향 · 한 열당 N개</text>
+            </svg>
+          </div>
+          <div class="mt-desc">1열 배열 · 한 열당 개수 = 총 개수</div>
+        </button>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>H' <span class="unit">유닛박스 높이 (mm)</span></label>
+          <input type="number" id="Hp" value="27.5" step="0.1" min="0">
+        </div>
+        <div class="field">
+          <label>W' <span class="unit">유닛박스 너비 (mm)</span></label>
+          <input type="number" id="Wp" value="96.1" step="0.1" min="0">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>L' <span class="unit">유닛박스 길이 (mm)</span></label>
+          <input type="number" id="Lp" value="182.5" step="0.1" min="0">
+        </div>
+        <div class="field">
+          <label>총 적재 개수 <span class="unit">(개)</span></label>
+          <input type="number" id="N" value="10" step="1" min="1">
+        </div>
+      </div>
+
+      <details class="advanced">
+        <summary>고급 설정 · 상수 값</summary>
+        <div class="row">
+          <div class="field">
+            <label>봉인라벨 두께 <span class="unit">mm</span></label>
+            <input type="number" id="seal" value="0.5" step="0.1" min="0">
+          </div>
+          <div class="field">
+            <label>Max 공차 <span class="unit">mm</span></label>
+            <input type="number" id="tol" value="0.4" step="0.1" min="0">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Flute 두께 <span class="unit">mm</span></label>
+            <input type="number" id="flute" value="4" step="0.1" min="0">
+          </div>
+          <div class="field">
+            <label>십자패드 두께 <span class="unit">mm</span></label>
+            <input type="number" id="pad" value="1" step="0.1" min="0">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field full">
+            <label>조립 Gap <span class="unit">mm</span></label>
+            <input type="number" id="gap" value="4" step="0.1" min="0">
+          </div>
+        </div>
+      </details>
+
+      <button class="calc-btn" id="calcBtn" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="12" y1="10" x2="14" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="12" y1="14" x2="14" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="14" y2="18"/></svg>
+        계산하기
+      </button>
+      <div class="stale-note" id="staleNote">입력이 변경되었습니다. 다시 계산하기를 눌러주세요.</div>
+
+      <div class="note">
+        <b>계산 규칙</b><br>
+        • <b>총 적재 개수</b>를 입력하면 배열 모드에 따라 한 열당 개수가 자동 계산됩니다.<br>
+        • 2×N 배열: 한 열당 = ⌈총 개수 ÷ 2⌉  ·  1×N 배열: 한 열당 = 총 개수.<br>
+        • H = L' + (Flute × 4) — 유닛박스가 세워진 채 적재되는 구조 기준.
+      </div>
+    </section>
+
+    <!-- 결과 -->
+    <section class="card">
+      <h2>결과 · MASTER BOX</h2>
+
+      <div class="result-main">
+        <div class="stat empty"><div class="k">L (길이)</div><div class="v"><span id="L">—</span><span class="u">mm</span></div></div>
+        <div class="stat empty"><div class="k">W (너비)</div><div class="v"><span id="W">—</span><span class="u">mm</span></div></div>
+        <div class="stat empty"><div class="k">H (높이)</div><div class="v"><span id="H">—</span><span class="u">mm</span></div></div>
+      </div>
+
+      <div class="formula empty" id="formula">계산하기 버튼을 눌러주세요</div>
+
+      <div class="sub-label">십자 패드 치수 (L" = L−10 / W" = W−10 / H" = H−15)</div>
+      <div class="result-sub">
+        <div class="stat sub empty"><div class="k">L"</div><div class="v"><span id="Ld">—</span><span class="u">mm</span></div></div>
+        <div class="stat sub empty"><div class="k">W"</div><div class="v"><span id="Wd">—</span><span class="u">mm</span></div></div>
+        <div class="stat sub empty"><div class="k">H"</div><div class="v"><span id="Hd">—</span><span class="u">mm</span></div></div>
+      </div>
+
+      <div class="sub-label">3D 시각화 <span style="color:var(--ink-4);font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px">· 드래그로 회전, 휠로 줌</span></div>
+      <div class="viz-empty" id="vizEmpty">
+        <div>
+          <span class="icon">🧊</span>
+          계산하기 버튼을 누르면<br>3D 적재 구조를 확인할 수 있습니다
+        </div>
+      </div>
+      <div class="viz-wrap" id="vizWrap" style="display:none">
+        <div class="viz-controls">
+          <button type="button" class="viz-btn" data-viz-action="reset" title="뷰 리셋">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          </button>
+          <button type="button" class="viz-btn" data-viz-action="toggle-master" title="마스터박스 표시/숨김">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-9 5-9-5V8l9-5 9 5v8Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+          </button>
+          <button type="button" class="viz-btn" data-viz-action="toggle-exploded" title="분해 보기">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v6"/><path d="M17 2v6"/><path d="M7 16v6"/><path d="M17 16v6"/><path d="M2 7h6"/><path d="M16 7h6"/><path d="M2 17h6"/><path d="M16 17h6"/></svg>
+          </button>
+        </div>
+        <div id="viz3d"></div>
+        <div class="viz-legend">
+          <span class="viz-lgd-item"><span class="viz-dot" style="background:#C19A6B;opacity:.7"></span>마스터박스</span>
+          <span class="viz-lgd-item"><span class="viz-dot" style="background:#D4B896"></span>유닛박스</span>
+        </div>
+      </div>
+
+      <div class="sub-label">도면 미리보기</div>
+      <div class="preview-empty" id="previewEmpty">
+        <div>
+          <span class="icon">📐</span>
+          계산하기 버튼을 누르면<br>마스터박스 도면이 여기에 표시됩니다
+        </div>
+      </div>
+      <div class="preview-wrap" id="previewWrap" style="display:none">
+        <canvas id="preview" width="1200" height="820"></canvas>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="pdfBtn" type="button" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          PDF 도면 다운로드
+        </button>
+        <button class="btn ghost" id="printBtn" type="button" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          인쇄
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <footer class="site">
+    <p>MASTER BOX Design Calculator · 설계식 기반 자동 산출 · <a href="https://yonchelee.com" target="_blank" rel="noopener">yonchelee.com</a></p>
+  </footer>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-inner">
+    <button class="lightbox-close" id="lightboxClose" aria-label="닫기">✕</button>
+    <div class="lightbox-controls">
+      <button class="lightbox-ctrl" id="lightboxZoomOut" aria-label="축소">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <button class="lightbox-ctrl" id="lightboxReset" aria-label="원래 크기">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      </button>
+      <button class="lightbox-ctrl" id="lightboxZoomIn" aria-label="확대">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><line x1="12" y1="5" x2="12" y2="19"/></svg>
+      </button>
+    </div>
+    <div class="lightbox-zoom-label" id="lightboxZoom">100%</div>
+    <div class="lightbox-content" id="lightboxContent">
+      <div class="lightbox-canvas-wrap" id="lightboxCanvasWrap">
+        <canvas id="lightboxCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+/* =========================================================
+   State
+   ========================================================= */
+const $ = (id)=>document.getElementById(id);
+const state = {
+  mode:'2xN',
+  computed:false,
+  lastResult:null,
+  lastInput:null,
+};
+const INPUT_IDS = ['Hp','Wp','Lp','N','seal','tol','flute','pad','gap'];
+
+document.querySelectorAll('.mode-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    if(btn.classList.contains('active')) return;
+    document.querySelectorAll('.mode-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode = btn.dataset.mode;
+    markStale();
+  });
+});
+
+INPUT_IDS.forEach(id=>{
+  $(id).addEventListener('input', markStale);
+});
+
+function markStale(){
+  if(state.computed) $('staleNote').classList.add('show');
+}
+function clearStale(){
+  $('staleNote').classList.remove('show');
+}
+
+$('calcBtn').addEventListener('click', ()=>{
+  const inp = getInputs();
+  const err = validate(inp);
+  if(err){ alert(err); return; }
+  const r = calc(inp);
+  renderResults(inp, r);
+  state.computed = true;
+  state.lastResult = r;
+  state.lastInput = inp;
+  clearStale();
+  $('pdfBtn').disabled = false;
+  $('printBtn').disabled = false;
+});
+
+/* =========================================================
+   Calculation
+   ========================================================= */
+function getInputs(){
+  const qty = Math.floor(+$('N').value);
+  const cols = state.mode === '2xN' ? 2 : 1;
+  const arrayN = Math.max(1, Math.ceil(qty / cols));  // 한 열당 개수 (원 계산식의 N)
+  return {
+    Hp:+$('Hp').value, Wp:+$('Wp').value, Lp:+$('Lp').value,
+    qty: qty,        // 사용자가 입력한 총 적재 개수
+    N: arrayN,       // 내부 계산식용 N (한 열당 개수)
+    cols: cols,      // 열 수 (2 또는 1)
+    seal:+$('seal').value, tol:+$('tol').value,
+    flute:+$('flute').value, pad:+$('pad').value, gap:+$('gap').value,
+    mode: state.mode
+  };
+}
+
+function validate(i){
+  const req = [
+    ['Hp',"H' (유닛박스 높이)"],
+    ['Wp',"W' (유닛박스 너비)"],
+    ['Lp',"L' (유닛박스 길이)"],
+    ['qty','총 적재 개수']
+  ];
+  for(const [k,label] of req){
+    const v = i[k];
+    if(!Number.isFinite(v) || v<=0){
+      return `${label}에 유효한 값(0 초과)을 입력해주세요.`;
+    }
+  }
+  if(i.qty < 1) return '총 적재 개수는 1 이상이어야 합니다.';
+  return null;
+}
+
+function round1(x){ return Math.round(x*10)/10; }
+function fmt(x){ return Number.isFinite(x) ? round1(x).toString() : '—'; }
+
+function calc(inp){
+  const {Hp,Wp,Lp,N,seal,tol,flute,pad,gap,mode} = inp;
+  let L,W,H;
+  if(mode==='2xN'){
+    L = (Hp + seal + tol) * N + flute + pad + gap;
+    W = (Wp + tol) * 2 + flute + pad + gap;
+  } else {
+    L = (Hp + seal + tol) * N + flute + pad + gap;
+    W = (Wp + tol) + flute + pad + gap;
+  }
+  H = Lp + flute*4;
+  const Ld = L - 10, Wd = W - 10, Hd = H - 15;
+  return { L,W,H, Ld,Wd,Hd };
+}
+
+function formulaText(inp,r){
+  const {Hp,Wp,Lp,N,qty,cols,seal,tol,flute,pad,gap,mode} = inp;
+  const capacity = cols * N;
+  const overflow = capacity > qty ? ` <span style="color:var(--ink-4)">(여유 ${capacity-qty}개)</span>` : '';
+  const header = `<div style="padding-bottom:10px;margin-bottom:10px;border-bottom:1px dashed var(--hairline);font-family:inherit;font-size:13px;color:var(--ink-2)"><b style="color:var(--ink);font-weight:700">총 ${qty}개</b> 적재 → <b>${cols} × ${N}</b> 배열 (한 열당 ${N}개)${overflow}</div>`;
+  const rows = mode==='2xN' ? [
+    `<span class="name">L</span><span class="eq">=</span>[(<span class="num">${Hp}</span> + <span class="num">${seal}</span> + <span class="num">${tol}</span>) × <span class="num">${N}</span>] + <span class="num">${flute}</span> + <span class="num">${pad}</span> + <span class="num">${gap}</span> <span class="eq">=</span> <span class="res">${fmt(r.L)} mm</span>`,
+    `<span class="name">W</span><span class="eq">=</span>(<span class="num">${Wp}</span> + <span class="num">${tol}</span>) × 2 + <span class="num">${flute}</span> + <span class="num">${pad}</span> + <span class="num">${gap}</span> <span class="eq">=</span> <span class="res">${fmt(r.W)} mm</span>`,
+    `<span class="name">H</span><span class="eq">=</span><span class="num">${Lp}</span> + (<span class="num">${flute}</span> × 4) <span class="eq">=</span> <span class="res">${fmt(r.H)} mm</span>`
+  ] : [
+    `<span class="name">L</span><span class="eq">=</span>[(<span class="num">${Hp}</span> + <span class="num">${seal}</span> + <span class="num">${tol}</span>) × <span class="num">${N}</span>] + <span class="num">${flute}</span> + <span class="num">${pad}</span> + <span class="num">${gap}</span> <span class="eq">=</span> <span class="res">${fmt(r.L)} mm</span>`,
+    `<span class="name">W</span><span class="eq">=</span>(<span class="num">${Wp}</span> + <span class="num">${tol}</span>) + <span class="num">${flute}</span> + <span class="num">${pad}</span> + <span class="num">${gap}</span> <span class="eq">=</span> <span class="res">${fmt(r.W)} mm</span>`,
+    `<span class="name">H</span><span class="eq">=</span><span class="num">${Lp}</span> + (<span class="num">${flute}</span> × 4) <span class="eq">=</span> <span class="res">${fmt(r.H)} mm</span>`
+  ];
+  return header + rows.join('<br>');
+}
+
+function renderResults(inp,r){
+  $('L').textContent = fmt(r.L);
+  $('W').textContent = fmt(r.W);
+  $('H').textContent = fmt(r.H);
+  $('Ld').textContent = fmt(r.Ld);
+  $('Wd').textContent = fmt(r.Wd);
+  $('Hd').textContent = fmt(r.Hd);
+
+  document.querySelectorAll('.stat').forEach(el=>el.classList.remove('empty'));
+
+  const f = $('formula');
+  f.classList.remove('empty');
+  f.innerHTML = formulaText(inp,r);
+
+  $('previewEmpty').style.display = 'none';
+  $('previewWrap').style.display = 'block';
+
+  drawPreview(inp,r);
+
+  // 3D Visualization
+  $('vizEmpty').style.display = 'none';
+  $('vizWrap').style.display = 'block';
+  updateViz3D(inp, r);
+}
+
+/* =========================================================
+   Canvas drawing
+   ========================================================= */
+function drawingAPI(ctx){
+  const api = {
+    clear(w,h,bg='#FAFAFA'){ ctx.fillStyle=bg; ctx.fillRect(0,0,w,h); },
+    rect(x,y,w,h,{stroke='#1a1a1a',lw=1.4,fill=null,dash=null}={}){
+      ctx.save();
+      if(dash) ctx.setLineDash(dash);
+      ctx.lineWidth=lw; ctx.strokeStyle=stroke;
+      if(fill){ ctx.fillStyle=fill; ctx.fillRect(x,y,w,h); }
+      ctx.strokeRect(x,y,w,h);
+      ctx.restore();
+    },
+    text(s,x,y,{size=12,color='#1a1a1a',weight='500',align='left',baseline='alphabetic'}={}){
+      ctx.save();
+      ctx.fillStyle=color;
+      ctx.font=`${weight} ${size}px 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif`;
+      ctx.textAlign=align; ctx.textBaseline=baseline;
+      ctx.fillText(s,x,y);
+      ctx.restore();
+    },
+    dimH(x1,x2,y,label,{color='#86868B',tick=6,size=11}={}){
+      ctx.save();
+      ctx.strokeStyle=color; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x2,y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x1,y-tick); ctx.lineTo(x1,y+tick);
+      ctx.moveTo(x2,y-tick); ctx.lineTo(x2,y+tick); ctx.stroke();
+      const midx = (x1+x2)/2;
+      ctx.font=`600 ${size}px 'Pretendard Variable', Pretendard, sans-serif`;
+      ctx.fillStyle='#FAFAFA';
+      const w = ctx.measureText(label).width + 12;
+      ctx.fillRect(midx-w/2, y-size/2-2, w, size+4);
+      api.text(label, midx, y, {size,align:'center',baseline:'middle',color:'#424245',weight:'600'});
+      ctx.restore();
+    },
+    dimV(y1,y2,x,label,{color='#86868B',tick=6,size=11}={}){
+      ctx.save();
+      ctx.strokeStyle=color; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x,y1); ctx.lineTo(x,y2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x-tick,y1); ctx.lineTo(x+tick,y1);
+      ctx.moveTo(x-tick,y2); ctx.lineTo(x+tick,y2); ctx.stroke();
+      const midy = (y1+y2)/2;
+      ctx.save();
+      ctx.translate(x,midy); ctx.rotate(-Math.PI/2);
+      ctx.font=`600 ${size}px 'Pretendard Variable', Pretendard, sans-serif`;
+      ctx.fillStyle='#FAFAFA';
+      const w = ctx.measureText(label).width + 12;
+      ctx.fillRect(-w/2, -size/2-2, w, size+4);
+      ctx.fillStyle='#424245'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(label,0,0);
+      ctx.restore();
+      ctx.restore();
+    },
+    titleBox(x,y,w,title,sub){
+      api.text(title, x, y, {size:13,weight:'700',color:'#1a1a1a'});
+      if(sub) api.text(sub, x+w, y, {size:11,weight:'500',color:'#424245',align:'right'});
+      ctx.save();
+      ctx.strokeStyle='#D2D2D7'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x,y+6); ctx.lineTo(x+w,y+6); ctx.stroke();
+      ctx.restore();
+    }
+  };
+  return api;
+}
+
+function drawPreview(inp,r){
+  const cvs = $('preview');
+  const ctx = cvs.getContext('2d');
+  renderDrawing(ctx, cvs.width, cvs.height, inp, r);
+}
+
+function renderDrawing(ctx, W, H, inp, r){
+  const api = drawingAPI(ctx);
+  api.clear(W,H,'#FAFAFA');
+
+  if(!Number.isFinite(r.L) || !Number.isFinite(r.W) || !Number.isFinite(r.H) || r.L<=0 || r.W<=0 || r.H<=0){
+    api.text('유효한 입력값을 넣어주세요', W/2, H/2, {size:16,color:'#999',align:'center',baseline:'middle'});
+    return;
+  }
+
+  const pad = 30;
+  const gapY = 30;
+  const innerH = H - pad*2 - gapY;
+  const innerW = W - pad*2;
+
+  // 두 도면의 실제 외곽 치수
+  const maxFlap = Math.max(r.L, r.W) / 2;
+  const mW = 35 + 2*r.L + 2*r.W;
+  const mH = maxFlap + r.H + maxFlap;
+  const cW = r.Hd + r.Ld + r.Hd;
+  const cH = r.Hd + r.Wd + r.Hd;
+
+  // 프레임 여백 (제목 + 치수선)
+  const frameOH = 90;   // 각 도면의 상하 추가 여백
+  const sideMargin = 80; // 좌우 치수선 여백
+
+  // 공통 스케일 계산 (두 도면이 동일 mm/px 비율)
+  const availW = innerW - sideMargin*2;
+  const availH = innerH - frameOH*2;
+  const sByW = availW / Math.max(mW, cW);
+  const sByH = availH / (mH + cH);
+  const commonScale = Math.min(sByW, sByH);
+
+  // 각 도면에 할당할 영역 = 실제 세로 * 공통스케일 + 프레임
+  const topH = mH * commonScale + frameOH;
+  const bottomH = cH * commonScale + frameOH;
+  const totalRequired = topH + bottomH + gapY;
+  const yStart = pad + Math.max(0, (H - pad*2 - totalRequired) / 2);
+
+  drawMasterBoxUnfolded(api,ctx, pad, yStart, innerW, topH, inp, r, commonScale);
+  drawCrossPad(api,ctx, pad, yStart + topH + gapY, innerW, bottomH, inp, r, commonScale);
+}
+
+function scaleFit(wActual,hActual, wBox,hBox, margin=60){
+  const sx = (wBox - margin*2)/wActual;
+  const sy = (hBox - margin*2)/hActual;
+  return Math.min(sx,sy);
+}
+
+/* 마스터박스 RSC 다이라인 전개도 (포장산업 표준)
+   레이아웃: [사다리꼴 GLUE FLAP][L후면][W우측][L전면][W좌측]
+   - 플랩 사이에 슬롯(노치)으로 분리
+   - 접힘선(점선)/재단선(실선) 구분
+   - 플루트 방향 표시
+   - 외곽 전체 치수선
+*/
+function drawMasterBoxUnfolded(api,ctx, ox,oy,cw,ch, inp, r, forcedScale){
+  const headH = 22;
+  api.titleBox(ox, oy+14, cw, '마스터박스 다이라인 · MASTER BOX DIELINE', `RSC · ${fmt(r.L)} × ${fmt(r.W)} × ${fmt(r.H)} mm`);
+  const areaY = oy + headH + 28;
+  const areaH = ch - headH - 28;
+
+  const {L, W, H} = r;
+  if(L<=0 || W<=0 || H<=0){
+    api.text('유효한 치수가 아닙니다', ox+cw/2, areaY+areaH/2,{size:14,color:'#999',align:'center',baseline:'middle'});
+    return;
+  }
+
+  const glueFlap = 35;    // 접합 플랩 너비 (mm)
+  const glueTaper = 10;   // 사다리꼴 경사 (mm)
+  const slotW = 4;        // 플랩 사이 슬롯 너비 (mm)
+
+  // 패널 정의: 각 패널의 flap 높이 = 인접 패널(이웃 변)의 폭 / 2
+  //   전면/후면 (폭=L) 플랩 높이 = W/2  (좌·우측면 길이의 반)
+  //   좌/우측면 (폭=W) 플랩 높이 = L/2  (전·후면 길이의 반)
+  // 조립 시 플랩이 박스 반대편까지 닿는 표준 RSC 원리
+  const panels = [
+    {w:L, name:'후면',  flap: W/2},
+    {w:W, name:'우측면', flap: L/2},
+    {w:L, name:'전면',  flap: W/2},
+    {w:W, name:'좌측면', flap: L/2}
+  ];
+  const maxFlapH = Math.max.apply(null, panels.map(function(p){ return p.flap; }));
+
+  const bodyW = L + W + L + W;
+  const totalW = glueFlap + bodyW;
+  const totalH = maxFlapH + H + maxFlapH;
+
+  // 공통 스케일이 주어지면 그걸 사용, 아니면 영역에 맞춰 자동 계산
+  const s = (typeof forcedScale === 'number' && forcedScale > 0)
+            ? forcedScale
+            : scaleFit(totalW, totalH, cw, areaH, 70);
+  const dTotalW = totalW * s;
+  const dTotalH = totalH * s;
+
+  const startX = ox + (cw - dTotalW) / 2 + glueFlap * s;
+  const startY = areaY + (areaH - dTotalH) / 2;
+
+  const bodyY = startY + maxFlapH * s;  // 본체 상단 경계 (가장 큰 플랩 기준)
+  const bodyH_px = H * s;
+  const slotHalf = (slotW / 2) * s;
+  const glueW_px = glueFlap * s;
+  const glueTaper_px = glueTaper * s;
+
+  const panelFill = '#F5F5F7';
+  const flapFill = '#FAFAFA';
+  const stroke = '#424245';
+  const strokeThin = '#86868B';
+
+  /* 1. 글루 플랩 (사다리꼴) */
+  ctx.save();
+  ctx.fillStyle = '#ECECEE';
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(startX - glueW_px, bodyY + glueTaper_px);
+  ctx.lineTo(startX, bodyY);
+  ctx.lineTo(startX, bodyY + bodyH_px);
+  ctx.lineTo(startX - glueW_px, bodyY + bodyH_px - glueTaper_px);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+  // 해치
+  ctx.save();
+  ctx.strokeStyle = 'rgba(134,134,139,0.4)';
+  ctx.lineWidth = 0.6;
+  const gLeft = startX - glueW_px;
+  for(let hx = gLeft + 4; hx < startX; hx += 5){
+    ctx.beginPath();
+    ctx.moveTo(hx, bodyY + 2); ctx.lineTo(hx + 8, bodyY + bodyH_px - 2);
+    ctx.stroke();
+  }
+  ctx.restore();
+  if(glueW_px > 26){
+    api.text('GLUE', startX - glueW_px/2, bodyY + bodyH_px/2 - 5, {size:9, align:'center', baseline:'middle', color:'#1D1D1F', weight:'700'});
+    api.text('FLAP', startX - glueW_px/2, bodyY + bodyH_px/2 + 7, {size:9, align:'center', baseline:'middle', color:'#1D1D1F', weight:'700'});
+  }
+
+  /* 2. 상단 플랩 - 각 패널마다 자기 너비의 절반 (들쑥날쑥) */
+  let curX = startX;
+  for(const p of panels){
+    const pw = p.w * s;
+    const fpx = p.flap * s;
+    const flapY = bodyY - fpx;  // 본체 상단에서 위로 자기 flap 높이만큼
+    api.rect(curX + slotHalf, flapY, pw - 2*slotHalf, fpx, {stroke:strokeThin, lw:1.2, fill:flapFill});
+    if(pw > 44 && fpx > 18){
+      api.text('상단 플랩', curX + pw/2, flapY + fpx/2 - 6, {size:9, align:'center', baseline:'middle', color:'#86868B', weight:'500'});
+      api.text(`${fmt(p.flap)}`, curX + pw/2, flapY + fpx/2 + 8, {size:9.5, align:'center', baseline:'middle', color:'#6E6E73', weight:'700'});
+    }
+    curX += pw;
+  }
+
+  /* 3. 본체 4패널 */
+  curX = startX;
+  for(const p of panels){
+    const pw = p.w * s;
+    api.rect(curX, bodyY, pw, bodyH_px, {stroke, lw:1.5, fill:panelFill});
+    if(pw > 34){
+      api.text(p.name, curX + pw/2, bodyY + bodyH_px/2 - 9, {size:11, align:'center', baseline:'middle', color:'#1D1D1F', weight:'700'});
+      api.text(`${fmt(p.w)} × ${fmt(H)}`, curX + pw/2, bodyY + bodyH_px/2 + 10, {size:9.5, align:'center', baseline:'middle', color:'#424245'});
+    }
+    curX += pw;
+  }
+
+  /* 4. 하단 플랩 - 각 패널마다 자기 너비의 절반 */
+  curX = startX;
+  for(const p of panels){
+    const pw = p.w * s;
+    const fpx = p.flap * s;
+    api.rect(curX + slotHalf, bodyY + bodyH_px, pw - 2*slotHalf, fpx, {stroke:strokeThin, lw:1.2, fill:flapFill});
+    if(pw > 44 && fpx > 18){
+      api.text('하단 플랩', curX + pw/2, bodyY + bodyH_px + fpx/2 - 6, {size:9, align:'center', baseline:'middle', color:'#86868B', weight:'500'});
+      api.text(`${fmt(p.flap)}`, curX + pw/2, bodyY + bodyH_px + fpx/2 + 8, {size:9.5, align:'center', baseline:'middle', color:'#6E6E73', weight:'700'});
+    }
+    curX += pw;
+  }
+
+  /* 5. 접힘선 (점선) */
+  ctx.save();
+  ctx.strokeStyle = '#86868B';
+  ctx.lineWidth = 1.3;
+  ctx.setLineDash([5, 3]);
+  ctx.beginPath();
+  // 가로 접힘선 (본체-플랩 경계)
+  ctx.moveTo(startX, bodyY); ctx.lineTo(startX + bodyW*s, bodyY);
+  ctx.moveTo(startX, bodyY + bodyH_px); ctx.lineTo(startX + bodyW*s, bodyY + bodyH_px);
+  // 세로 접힘선 (패널 간)
+  let xc = startX;
+  for(let i = 0; i < 4; i++){
+    xc += panels[i].w * s;
+    if(i < 3){
+      ctx.moveTo(xc, bodyY); ctx.lineTo(xc, bodyY + bodyH_px);
+    }
+  }
+  // 글루 플랩 접힘선
+  ctx.moveTo(startX, bodyY); ctx.lineTo(startX, bodyY + bodyH_px);
+  ctx.stroke();
+  ctx.restore();
+
+  /* 6. 치수선 */
+  // 각 패널 너비 (상단 위, 최대 플랩 위쪽에 위치)
+  const dimYTop = startY - 20;
+  curX = startX;
+  for(const p of panels){
+    const pw = p.w * s;
+    api.dimH(curX, curX + pw, dimYTop, `${fmt(p.w)}`);
+    curX += pw;
+  }
+  api.dimH(startX - glueW_px, startX, dimYTop, `${fmt(glueFlap)}`);
+
+  // 전체 가로 (맨 아래)
+  const dimYBottom = bodyY + bodyH_px + maxFlapH * s + 28;
+  api.dimH(startX - glueW_px, startX + bodyW*s, dimYBottom, `전체 가로 ${fmt(totalW)} mm`);
+
+  // 전체 세로 (왼쪽 바깥)
+  const dimXLeft = startX - glueW_px - 26;
+  api.dimV(startY, bodyY + bodyH_px + maxFlapH * s, dimXLeft, `전체 세로 ${fmt(totalH)}`);
+
+  // 우측 세로: H 본체 (최대 플랩 기준)
+  const dimXRight = startX + bodyW*s + 26;
+  api.dimV(bodyY, bodyY + bodyH_px, dimXRight, `H = ${fmt(H)}`);
+  api.dimV(startY, bodyY, dimXRight, `${fmt(maxFlapH)} (max)`);
+  api.dimV(bodyY + bodyH_px, bodyY + bodyH_px + maxFlapH * s, dimXRight, `${fmt(maxFlapH)} (max)`);
+
+  /* 7. 제품 스펙 박스 (좌상단) */
+  const specX = ox + 4, specY = oy + 38;
+  api.text('PRODUCT SPECIFICATIONS', specX, specY, {size:9, weight:'700', color:'#1D1D1F'});
+  api.text(`DIMENSION: ${fmt(r.L)} × ${fmt(r.W)} × ${fmt(r.H)} mm`, specX, specY + 10, {size:8.5, color:'#424245'});
+  api.text(`MATERIAL: Corrugated Board`, specX, specY + 20, {size:8.5, color:'#424245'});
+  api.text(`GLUE TYPE: STRAIGHT LINE (SINGLE JOINT)`, specX, specY + 30, {size:8.5, color:'#424245'});
+  api.text(`ARRAY: ${inp.cols} × ${inp.N} (total ${inp.qty} ea)`, specX, specY + 40, {size:8.5, color:'#424245'});
+  api.text(`FLAP: 전·후면 플랩=W/2, 좌·우측면 플랩=L/2`, specX, specY + 50, {size:8.5, color:'#424245'});
+
+  /* 8. 플루트 방향 (우상단) */
+  const fdX = ox + cw - 88, fdY = oy + 44;
+  ctx.save();
+  ctx.strokeStyle = '#424245';
+  ctx.lineWidth = 1.2;
+  const ax = fdX, ay1 = fdY - 14, ay2 = fdY + 14;
+  ctx.beginPath();
+  ctx.moveTo(ax, ay1); ctx.lineTo(ax, ay2);
+  ctx.moveTo(ax - 4, ay1 + 6); ctx.lineTo(ax, ay1); ctx.lineTo(ax + 4, ay1 + 6);
+  ctx.moveTo(ax - 4, ay2 - 6); ctx.lineTo(ax, ay2); ctx.lineTo(ax + 4, ay2 - 6);
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(134,134,139,0.5)';
+  ctx.lineWidth = 0.8;
+  for(let i = 0; i < 3; i++){
+    ctx.beginPath();
+    ctx.moveTo(ax + 10 + i*4, ay1 + 3);
+    ctx.bezierCurveTo(ax + 14 + i*4, ay1 + 10, ax + 6 + i*4, ay2 - 10, ax + 10 + i*4, ay2 - 3);
+    ctx.stroke();
+  }
+  ctx.restore();
+  api.text('FLUTE DIRECTION', fdX + 24, fdY, {size:9, color:'#1D1D1F', weight:'600', baseline:'middle'});
+
+  /* 9. 범례 */
+  const legendY = areaY + areaH - 6;
+  ctx.save();
+  ctx.strokeStyle = '#86868B';
+  ctx.lineWidth = 1.3;
+  ctx.setLineDash([5, 3]);
+  ctx.beginPath();
+  ctx.moveTo(ox + 8, legendY); ctx.lineTo(ox + 28, legendY);
+  ctx.stroke();
+  ctx.restore();
+  api.text('CREASE (접힘선)', ox + 34, legendY, {size:9, color:'#424245', baseline:'middle', weight:'500'});
+  ctx.save();
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(ox + 140, legendY); ctx.lineTo(ox + 160, legendY);
+  ctx.stroke();
+  ctx.restore();
+  api.text('CUT (재단선)', ox + 166, legendY, {size:9, color:'#424245', baseline:'middle', weight:'500'});
+}
+
+function drawCrossPad(api,ctx, ox,oy,cw,ch, inp, r, forcedScale){
+  const headH = 22;
+  api.titleBox(ox, oy+14, cw, '십자 패드 전개도 · CROSS PAD', '바닥 + 4측면 일체형');
+  const areaY = oy + headH + 20;
+  const areaH = ch - headH - 20;
+
+  const L = r.Ld, W = r.Wd, H = r.Hd;
+  if(L<=0 || W<=0 || H<=0){
+    api.text('치수가 유효하지 않습니다', ox+cw/2, areaY+areaH/2,{size:14,color:'#999',align:'center',baseline:'middle'});
+    return;
+  }
+
+  // 전개도 외곽: 가로 (H + L + H), 세로 (H + W + H)
+  const totalW = H + L + H;
+  const totalH = H + W + H;
+
+  const s = (typeof forcedScale === 'number' && forcedScale > 0)
+            ? forcedScale
+            : scaleFit(totalW, totalH, cw, areaH, 70);
+  const dTotalW = totalW * s;
+  const dTotalH = totalH * s;
+
+  const startX = ox + (cw - dTotalW) / 2;
+  const startY = areaY + (areaH - dTotalH) / 2;
+
+  // 바닥면 기준점
+  const baseX = startX + H * s;
+  const baseY = startY + H * s;
+  const baseW_px = L * s;
+  const baseH_px = W * s;
+  const H_px = H * s;
+
+  // 4개 측면 (연한 색)
+  const flapFill = '#F5F5F7';
+  const flapStroke = '#86868B';
+  // 위 측면 (L × H)
+  api.rect(baseX, startY, baseW_px, H_px, {stroke:flapStroke, lw:1.4, fill:flapFill});
+  // 아래 측면 (L × H)
+  api.rect(baseX, baseY + baseH_px, baseW_px, H_px, {stroke:flapStroke, lw:1.4, fill:flapFill});
+  // 왼쪽 측면 (W × H)
+  api.rect(startX, baseY, H_px, baseH_px, {stroke:flapStroke, lw:1.4, fill:flapFill});
+  // 오른쪽 측면 (W × H)
+  api.rect(baseX + baseW_px, baseY, H_px, baseH_px, {stroke:flapStroke, lw:1.4, fill:flapFill});
+
+  // 바닥면 (더 진한 색, 강조)
+  api.rect(baseX, baseY, baseW_px, baseH_px, {stroke:flapStroke, lw:2, fill:'#ECECEE'});
+
+  // 접힘선 (바닥면 테두리 = 4개 측면과의 연결선) - 점선 강조
+  ctx.save();
+  ctx.strokeStyle = '#86868B';
+  ctx.lineWidth = 1.2;
+  ctx.setLineDash([5, 3]);
+  ctx.beginPath();
+  ctx.moveTo(baseX, baseY); ctx.lineTo(baseX + baseW_px, baseY);
+  ctx.moveTo(baseX, baseY + baseH_px); ctx.lineTo(baseX + baseW_px, baseY + baseH_px);
+  ctx.moveTo(baseX, baseY); ctx.lineTo(baseX, baseY + baseH_px);
+  ctx.moveTo(baseX + baseW_px, baseY); ctx.lineTo(baseX + baseW_px, baseY + baseH_px);
+  ctx.stroke();
+  ctx.restore();
+
+  // 라벨
+  api.text('바닥', baseX + baseW_px/2, baseY + baseH_px/2 - 7, {size:11, align:'center', baseline:'middle', color:'#1D1D1F', weight:'700'});
+  api.text(`L" × W"`, baseX + baseW_px/2, baseY + baseH_px/2 + 8, {size:10, align:'center', baseline:'middle', color:'#424245'});
+
+  api.text('측면 (L"×H")', baseX + baseW_px/2, startY + H_px/2, {size:9.5, align:'center', baseline:'middle', color:'#424245', weight:'500'});
+  api.text('측면 (L"×H")', baseX + baseW_px/2, baseY + baseH_px + H_px/2, {size:9.5, align:'center', baseline:'middle', color:'#424245', weight:'500'});
+  api.text('측면', startX + H_px/2, baseY + baseH_px/2 - 6, {size:9.5, align:'center', baseline:'middle', color:'#424245', weight:'500'});
+  api.text(`W"×H"`, startX + H_px/2, baseY + baseH_px/2 + 7, {size:9, align:'center', baseline:'middle', color:'#424245'});
+  api.text('측면', baseX + baseW_px + H_px/2, baseY + baseH_px/2 - 6, {size:9.5, align:'center', baseline:'middle', color:'#424245', weight:'500'});
+  api.text(`W"×H"`, baseX + baseW_px + H_px/2, baseY + baseH_px/2 + 7, {size:9, align:'center', baseline:'middle', color:'#424245'});
+
+  // 치수선
+  // L": 하단 측면 아래
+  api.dimH(baseX, baseX + baseW_px, baseY + baseH_px + H_px + 22, `L" = ${fmt(L)}`);
+  // W": 왼쪽 측면 왼쪽 바깥
+  api.dimV(baseY, baseY + baseH_px, startX - 22, `W" = ${fmt(W)}`);
+  // H": 전체 오른쪽 바깥에 측면 높이 표시
+  api.dimV(startY, baseY, startX + dTotalW + 22, `H" = ${fmt(H)}`);
+
+  // 접힘선 범례
+  const legendY = areaY + areaH - 12;
+  ctx.save();
+  ctx.strokeStyle = '#86868B';
+  ctx.lineWidth = 1.2;
+  ctx.setLineDash([5, 3]);
+  ctx.beginPath();
+  ctx.moveTo(ox + 8, legendY); ctx.lineTo(ox + 26, legendY);
+  ctx.stroke();
+  ctx.restore();
+  api.text('접힘선 (바닥 테두리 = 측면 연결면)', ox + 32, legendY, {size:9, color:'#424245', baseline:'middle', weight:'500'});
+}
+
+/* =========================================================
+   3D Visualization (Three.js)
+   ========================================================= */
+const viz3D = (function(){
+  let scene, camera, renderer, container;
+  let masterGroup, unitsGroup, axesGroup, labelsGroup;
+  let theta = Math.PI * 0.18;  // 수평 회전
+  let phi = Math.PI * 0.28;    // 수직 회전
+  let targetTheta = theta, targetPhi = phi;
+  let distance = 1.8;           // 카메라 거리 배수
+  let targetDistance = distance;
+  let exploded = false;
+  let masterVisible = true;
+  let initialized = false;
+  let animHandle = null;
+  let lastR = null;
+
+  const DEFAULT_THETA = Math.PI * 0.18;
+  const DEFAULT_PHI = Math.PI * 0.28;
+  const DEFAULT_DISTANCE = 1.8;
+
+  function init(){
+    if(initialized) return true;
+    if(typeof THREE === 'undefined'){
+      console.warn('Three.js not loaded');
+      return false;
+    }
+    container = document.getElementById('viz3d');
+    if(!container) return false;
+
+    scene = new THREE.Scene();
+    scene.background = null;
+
+    const w = container.clientWidth || 600;
+    const h = container.clientHeight || 380;
+
+    camera = new THREE.PerspectiveCamera(38, w/h, 1, 10000);
+
+    renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(w, h);
+    renderer.setClearColor(0x000000, 0);
+    container.appendChild(renderer.domElement);
+
+    // 조명
+    const ambient = new THREE.AmbientLight(0xffffff, 0.75);
+    scene.add(ambient);
+    const dir = new THREE.DirectionalLight(0xffffff, 0.55);
+    dir.position.set(1, 1.5, 1);
+    scene.add(dir);
+    const dir2 = new THREE.DirectionalLight(0xffffff, 0.25);
+    dir2.position.set(-1, 0.5, -1);
+    scene.add(dir2);
+
+    masterGroup = new THREE.Group();
+    unitsGroup = new THREE.Group();
+    axesGroup = new THREE.Group();
+    scene.add(masterGroup, unitsGroup, axesGroup);
+
+    bindInteraction();
+    window.addEventListener('resize', handleResize);
+    initialized = true;
+    return true;
+  }
+
+  function handleResize(){
+    if(!container || !renderer) return;
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    renderer.setSize(w, h);
+    camera.aspect = w/h;
+    camera.updateProjectionMatrix();
+  }
+
+  function bindInteraction(){
+    let isDown = false;
+    let lastX = 0, lastY = 0;
+
+    const onDown = (e)=>{
+      isDown = true;
+      const p = e.touches ? e.touches[0] : e;
+      lastX = p.clientX; lastY = p.clientY;
+    };
+    const onMove = (e)=>{
+      if(!isDown) return;
+      e.preventDefault();
+      const p = e.touches ? e.touches[0] : e;
+      const dx = p.clientX - lastX;
+      const dy = p.clientY - lastY;
+      lastX = p.clientX; lastY = p.clientY;
+      targetTheta -= dx * 0.008;
+      targetPhi = Math.max(0.05, Math.min(Math.PI - 0.05, targetPhi - dy * 0.008));
+    };
+    const onUp = ()=>{ isDown = false; };
+
+    container.addEventListener('mousedown', onDown);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    container.addEventListener('touchstart', onDown, {passive:false});
+    container.addEventListener('touchmove', onMove, {passive:false});
+    container.addEventListener('touchend', onUp);
+
+    container.addEventListener('wheel', (e)=>{
+      e.preventDefault();
+      const factor = e.deltaY > 0 ? 1.1 : 0.9;
+      targetDistance = Math.max(0.8, Math.min(4.5, targetDistance * factor));
+    }, {passive:false});
+
+    container.addEventListener('dblclick', ()=>{
+      targetTheta = DEFAULT_THETA;
+      targetPhi = DEFAULT_PHI;
+      targetDistance = DEFAULT_DISTANCE;
+    });
+
+    // 컨트롤 버튼
+    document.querySelectorAll('[data-viz-action]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const action = btn.dataset.vizAction;
+        if(action === 'reset'){
+          targetTheta = DEFAULT_THETA;
+          targetPhi = DEFAULT_PHI;
+          targetDistance = DEFAULT_DISTANCE;
+        } else if(action === 'toggle-master'){
+          masterVisible = !masterVisible;
+          btn.classList.toggle('active', !masterVisible);
+          if(masterGroup) masterGroup.visible = masterVisible;
+        } else if(action === 'toggle-exploded'){
+          exploded = !exploded;
+          btn.classList.toggle('active', exploded);
+          if(lastR) buildScene(lastR.inp, lastR.r);
+        }
+      });
+    });
+  }
+
+  function clearGroup(g){
+    while(g && g.children.length > 0){
+      const c = g.children[0];
+      g.remove(c);
+      if(c.geometry) c.geometry.dispose();
+      if(c.material){
+        if(Array.isArray(c.material)) c.material.forEach(m=>m.dispose());
+        else c.material.dispose();
+      }
+    }
+  }
+
+  function buildScene(inp, r){
+    clearGroup(masterGroup);
+    clearGroup(unitsGroup);
+    clearGroup(axesGroup);
+
+    const {L, W, H} = r;
+
+    // 골판지 박스 색상 (크라프트지 톤)
+    const KRAFT_MASTER = 0xC19A6B;   // 진한 크라프트 (외부)
+    const KRAFT_MASTER_DK = 0x8B6F47; // 그림자용
+    const KRAFT_UNIT = 0xD4B896;      // 연한 크라프트 (유닛박스)
+    const KRAFT_EDGE = 0x5C4A2E;      // 진한 가장자리
+
+    // 마스터박스 (크라프트지 색상, 불투명)
+    const masterGeom = new THREE.BoxGeometry(L, H, W);
+    const masterMat = new THREE.MeshStandardMaterial({
+      color: KRAFT_MASTER,
+      transparent: true,
+      opacity: 0.35,       // 반투명 유지 (내부 유닛박스 보이게)
+      roughness: 0.92,     // 종이처럼 거친 표면
+      metalness: 0.0,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const masterMesh = new THREE.Mesh(masterGeom, masterMat);
+    masterGroup.add(masterMesh);
+
+    // 마스터박스 와이어프레임 (접힘선/모서리 강조)
+    const masterEdges = new THREE.EdgesGeometry(masterGeom);
+    const masterLine = new THREE.LineSegments(
+      masterEdges,
+      new THREE.LineBasicMaterial({color: KRAFT_EDGE, transparent: true, opacity: 0.8, linewidth: 2})
+    );
+    masterGroup.add(masterLine);
+
+    // 상단 플랩 접힘선 (중앙 교차선) - L방향/W방향 각 한 줄
+    const flapLineMat = new THREE.LineBasicMaterial({
+      color: KRAFT_EDGE, transparent: true, opacity: 0.45
+    });
+    const topY = H/2 + 0.1;
+    // L방향 접힘선 (W방향 중앙)
+    const flapLine1 = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-L/2, topY, 0),
+      new THREE.Vector3(L/2, topY, 0)
+    ]);
+    masterGroup.add(new THREE.Line(flapLine1, flapLineMat));
+    // W방향 접힘선 (L방향 중앙)
+    const flapLine2 = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, topY, -W/2),
+      new THREE.Vector3(0, topY, W/2)
+    ]);
+    masterGroup.add(new THREE.Line(flapLine2, flapLineMat));
+
+    // 하단 바닥 접힘선
+    const botY = -H/2 - 0.1;
+    const flapLine3 = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-L/2, botY, 0),
+      new THREE.Vector3(L/2, botY, 0)
+    ]);
+    masterGroup.add(new THREE.Line(flapLine3, flapLineMat));
+    const flapLine4 = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, botY, -W/2),
+      new THREE.Vector3(0, botY, W/2)
+    ]);
+    masterGroup.add(new THREE.Line(flapLine4, flapLineMat));
+
+    masterGroup.visible = masterVisible;
+
+    // 유닛박스 배치
+    // 유닛박스 점유 공간 (mm): L방향 = Hp + seal + tol, W방향 = Wp + tol, 세움길이 = Lp (H방향)
+    const unitL = inp.Hp + inp.seal + inp.tol;
+    const unitW = inp.Wp + inp.tol;
+    const unitH = inp.Lp;  // 세워진 유닛박스의 높이
+
+    // 유닛박스 렌더링 크기 (약간 축소해서 간섭 표현 피하기)
+    const uGap = 0.85;  // 포장 내부 압축 느낌
+    const renderL = (inp.Hp) * 0.98;
+    const renderW = (inp.Wp) * 0.98;
+    const renderH = inp.Lp * 0.98;
+
+    const cols = inp.cols;  // W 방향 열 수 (1 or 2)
+    const rows = inp.N;     // L 방향 개수
+
+    // 내부 여백 (flute+pad+gap의 절반)
+    const innerPad = (inp.flute + inp.pad + inp.gap) / 2;
+
+    // L 방향 스텝 (마스터박스 중앙 기준)
+    const totalUsedL = unitL * rows;
+    const totalUsedW = unitW * cols;
+
+    // 마스터박스 내부 바닥 좌표 (Y축: 바닥 = -H/2)
+    const innerXStart = -L/2 + innerPad + unitL/2;
+    const innerZStart = -W/2 + innerPad + unitW/2;
+
+    // 적재된 실제 개수 만큼만 (qty 한도)
+    const totalSlots = cols * rows;
+    const placeCount = Math.min(totalSlots, inp.qty);
+
+    const explodeOffset = exploded ? 12 : 0;
+    const unitMat = new THREE.MeshStandardMaterial({
+      color: KRAFT_UNIT,
+      roughness: 0.88,
+      metalness: 0.0
+    });
+    const unitMatEmpty = new THREE.MeshStandardMaterial({
+      color: 0xD2D2D7,
+      transparent: true,
+      opacity: 0.35,
+      roughness: 0.85,
+      metalness: 0.0
+    });
+
+    let placed = 0;
+    for(let c = 0; c < rows; c++){  // L 방향 (rows = N)
+      for(let ro = 0; ro < cols; ro++){  // W 방향
+        const x = innerXStart + c * unitL;
+        const z = innerZStart + ro * unitW;
+        // y: 바닥부터 올라가고, 상하 flute 두께만큼 띄움
+        const y = -H/2 + inp.flute + renderH/2;
+
+        const isFilled = placed < placeCount;
+        placed++;
+
+        // exploded 모드: 각 유닛박스를 중심에서 바깥으로 약간 밀어냄
+        let ex = 0, ey = 0, ez = 0;
+        if(exploded){
+          ex = Math.sign(x) * explodeOffset + (c - (rows-1)/2) * explodeOffset * 0.5;
+          ez = Math.sign(z) * explodeOffset + (ro - (cols-1)/2) * explodeOffset * 0.5;
+          ey = explodeOffset * 0.3;
+        }
+
+        const g = new THREE.BoxGeometry(renderL, renderH, renderW);
+        const mat = isFilled ? unitMat : unitMatEmpty;
+        const mesh = new THREE.Mesh(g, mat);
+        mesh.position.set(x + ex, y + ey, z + ez);
+
+        // 엣지
+        const eg = new THREE.EdgesGeometry(g);
+        const line = new THREE.LineSegments(
+          eg,
+          new THREE.LineBasicMaterial({
+            color: isFilled ? KRAFT_EDGE : 0xD2D2D7,
+            transparent: true,
+            opacity: isFilled ? 0.7 : 0.3
+          })
+        );
+        line.position.copy(mesh.position);
+        unitsGroup.add(mesh, line);
+      }
+    }
+
+    // 축 표시 (하단 바닥면)
+    const axisY = -H/2 - 8;
+    const axisLen = Math.max(L, W) * 0.55;
+
+    const makeAxis = (from, to, color)=>{
+      const g = new THREE.BufferGeometry().setFromPoints([from, to]);
+      const m = new THREE.LineBasicMaterial({color: color, transparent: true, opacity: 0.6});
+      return new THREE.Line(g, m);
+    };
+    // X axis (L 방향)
+    axesGroup.add(makeAxis(
+      new THREE.Vector3(-L/2 - 8, axisY, -W/2 - 8),
+      new THREE.Vector3(-L/2 + axisLen, axisY, -W/2 - 8),
+      0xEE0979
+    ));
+    // Z axis (W 방향)
+    axesGroup.add(makeAxis(
+      new THREE.Vector3(-L/2 - 8, axisY, -W/2 - 8),
+      new THREE.Vector3(-L/2 - 8, axisY, -W/2 + axisLen),
+      0x4F46E5
+    ));
+    // Y axis (H 방향)
+    axesGroup.add(makeAxis(
+      new THREE.Vector3(-L/2 - 8, axisY, -W/2 - 8),
+      new THREE.Vector3(-L/2 - 8, axisY + axisLen*0.7, -W/2 - 8),
+      0xFF6A00
+    ));
+
+    lastR = {inp, r};
+    updateCameraTarget();
+  }
+
+  function updateCameraTarget(){
+    if(!lastR) return;
+    const {L, W, H} = lastR.r;
+    const diag = Math.sqrt(L*L + W*W + H*H);
+    // 카메라 타깃을 0,0,0으로 유지, 거리는 대각선 배수
+    targetDistance = Math.max(0.8, Math.min(4.5, targetDistance));  // 현재값 유지
+    camera.near = diag * 0.01;
+    camera.far = diag * 20;
+    camera.updateProjectionMatrix();
+  }
+
+  function animate(){
+    if(!initialized) return;
+    animHandle = requestAnimationFrame(animate);
+
+    // 이징
+    theta += (targetTheta - theta) * 0.12;
+    phi += (targetPhi - phi) * 0.12;
+    distance += (targetDistance - distance) * 0.12;
+
+    if(lastR){
+      const {L, W, H} = lastR.r;
+      const diag = Math.sqrt(L*L + W*W + H*H);
+      const r_ = diag * distance;
+      camera.position.x = r_ * Math.sin(phi) * Math.cos(theta);
+      camera.position.y = r_ * Math.cos(phi);
+      camera.position.z = r_ * Math.sin(phi) * Math.sin(theta);
+      camera.lookAt(0, 0, 0);
+    }
+
+    renderer.render(scene, camera);
+  }
+
+  function render(inp, r){
+    if(!init()) return;
+    buildScene(inp, r);
+    handleResize();
+    if(!animHandle) animate();
+  }
+
+  return { render };
+})();
+
+function updateViz3D(inp, r){
+  if(typeof THREE === 'undefined'){
+    console.warn('Three.js not yet loaded');
+    return;
+  }
+  viz3D.render(inp, r);
+}
+
+/* =========================================================
+   PDF export
+   ========================================================= */
+$('pdfBtn').addEventListener('click', exportPDF);
+$('printBtn').addEventListener('click', ()=>window.print());
+
+function exportPDF(){
+  if(!state.computed || !state.lastResult){
+    alert('먼저 계산하기 버튼을 눌러주세요.');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const inp = state.lastInput;
+  const r = state.lastResult;
+
+  // ========================================================
+  // Page 1: 마스터박스 다이라인 (실제 1:1 스케일 벡터)
+  // ========================================================
+  const glueFlap = 35;
+  const glueTaper = 10;
+  const slotW = 4;
+  const panels = [
+    {w:r.L, name:'Back',  flap: r.W/2},
+    {w:r.W, name:'Right', flap: r.L/2},
+    {w:r.L, name:'Front', flap: r.W/2},
+    {w:r.W, name:'Left',  flap: r.L/2}
+  ];
+  const maxFlapH = Math.max(r.W/2, r.L/2);
+  const mBodyW = r.L + r.W + r.L + r.W;
+  const mTotalW = glueFlap + mBodyW;
+  const mTotalH = maxFlapH + r.H + maxFlapH;
+
+  // ========================================================
+  // Page 2: 십자패드 전개도 (실제 1:1 스케일 벡터)
+  // ========================================================
+  const cBodyW = r.Hd + r.Ld + r.Hd;
+  const cBodyH = r.Hd + r.Wd + r.Hd;
+
+  // 공통 여백 (재단 작업용)
+  const margin = 15;           // mm
+  const titleBlockH = 55;      // 제목 블록 세로 (mm)
+  const bottomInfoH = 12;      // 하단 footer (mm)
+
+  // 용지 자동 선택
+  function pickFormat(contentW, contentH){
+    // 실제 콘텐츠 + 치수선·제목 여백 고려
+    const needW = contentW + margin*2 + 30;  // 치수선·라벨용 좌우 여유
+    const needH = contentH + titleBlockH + bottomInfoH + margin*2 + 40;
+    const formats = [
+      ['a4', 297, 210],
+      ['a3', 420, 297],
+      ['a2', 594, 420],
+      ['a1', 841, 594],
+      ['a0', 1189, 841]
+    ];
+    for(const [name, long, short] of formats){
+      // 가로(landscape)와 세로(portrait) 둘 다 체크, 맞는 쪽 선택
+      if(needW <= long && needH <= short) return {name, w:long, h:short, orient:'landscape'};
+      if(needW <= short && needH <= long) return {name, w:short, h:long, orient:'portrait'};
+    }
+    // 너무 크면 A0 landscape 강제
+    return {name:'a0', w:1189, h:841, orient:'landscape'};
+  }
+
+  const fmt1 = pickFormat(mTotalW, mTotalH);
+  const fmt2 = pickFormat(cBodyW, cBodyH);
+
+  const doc = new jsPDF({orientation: fmt1.orient, unit:'mm', format: fmt1.name});
+
+  // ========== 공통 유틸 (벡터 그리기) ==========
+  const INK = [29, 29, 31];
+  const INK2 = [66, 66, 69];
+  const INK3 = [110, 110, 115];
+  const INK4 = [134, 134, 139];
+  const HAIR = [210, 210, 215];
+  const CUT_COLOR = [0, 0, 0];         // 재단선 검정
+  const CREASE_COLOR = [200, 60, 60];   // 접힘선 빨강 (업계 관례)
+  const DIM_COLOR = [80, 80, 80];       // 치수선 회색
+
+  function setStroke(doc, rgb, width){
+    doc.setDrawColor(rgb[0], rgb[1], rgb[2]);
+    doc.setLineWidth(width);
+  }
+  function setFill(doc, rgb){
+    doc.setFillColor(rgb[0], rgb[1], rgb[2]);
+  }
+  function setText(doc, rgb){
+    doc.setTextColor(rgb[0], rgb[1], rgb[2]);
+  }
+
+  // 점선 그리기 (jsPDF 2.5.1은 setLineDashPattern 지원)
+  function drawDashedLine(doc, x1, y1, x2, y2){
+    if(doc.setLineDashPattern){
+      doc.setLineDashPattern([1.5, 1.5], 0);
+      doc.line(x1, y1, x2, y2);
+      doc.setLineDashPattern([], 0);
+    } else {
+      // fallback: 수동 점선
+      const dx = x2-x1, dy = y2-y1;
+      const len = Math.hypot(dx, dy);
+      const steps = Math.floor(len / 3);
+      const ux = dx/len, uy = dy/len;
+      for(let i = 0; i < steps; i += 2){
+        const sx = x1 + ux*i*1.5;
+        const sy = y1 + uy*i*1.5;
+        const ex = x1 + ux*Math.min((i+1)*1.5, len);
+        const ey = y1 + uy*Math.min((i+1)*1.5, len);
+        doc.line(sx, sy, ex, ey);
+      }
+    }
+  }
+
+  // 치수선 (가로)
+  function dimH(doc, x1, x2, y, label, tick){
+    tick = tick || 1.5;
+    setStroke(doc, DIM_COLOR, 0.25);
+    doc.line(x1, y, x2, y);
+    doc.line(x1, y-tick, x1, y+tick);
+    doc.line(x2, y-tick, x2, y+tick);
+    setText(doc, DIM_COLOR);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8);
+    const mx = (x1+x2)/2;
+    // 배경 (가독성)
+    setFill(doc, [255,255,255]);
+    const tw = doc.getTextWidth(label);
+    doc.rect(mx - tw/2 - 1, y - 1.8, tw+2, 3.4, 'F');
+    doc.text(label, mx, y+0.5, {align:'center'});
+  }
+
+  // 치수선 (세로)
+  function dimV(doc, y1, y2, x, label, tick){
+    tick = tick || 1.5;
+    setStroke(doc, DIM_COLOR, 0.25);
+    doc.line(x, y1, x, y2);
+    doc.line(x-tick, y1, x+tick, y1);
+    doc.line(x-tick, y2, x+tick, y2);
+    setText(doc, DIM_COLOR);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8);
+    const my = (y1+y2)/2;
+    setFill(doc, [255,255,255]);
+    const tw = doc.getTextWidth(label);
+    // 세로 치수는 회전 텍스트
+    doc.text(label, x - 2, my, {align:'right', baseline:'middle', angle:90});
+  }
+
+  // 타이틀 블록 (우측 하단, 도면 표준)
+  function drawTitleBlock(doc, pw, ph, pageTitle, pageSubtitle, pageNum, totalPages){
+    const tbW = 100;
+    const tbH = 30;
+    const tbX = pw - margin - tbW;
+    const tbY = ph - margin - tbH;
+
+    setStroke(doc, INK, 0.3);
+    doc.rect(tbX, tbY, tbW, tbH);
+    doc.line(tbX, tbY + 10, tbX + tbW, tbY + 10);
+    doc.line(tbX, tbY + 20, tbX + tbW, tbY + 20);
+    doc.line(tbX + 50, tbY, tbX + 50, tbY + tbH);
+
+    setText(doc, INK);
+    doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    doc.text(pageTitle, tbX + 2, tbY + 7);
+
+    setText(doc, INK3);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7);
+    doc.text('SUBTITLE', tbX + 2, tbY + 13);
+    setText(doc, INK2);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8);
+    doc.text(pageSubtitle, tbX + 2, tbY + 18);
+
+    setText(doc, INK3);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7);
+    doc.text('SCALE', tbX + 52, tbY + 7);
+    setText(doc, INK);
+    doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    doc.text('1 : 1', tbX + 52, tbY + 13);
+
+    setText(doc, INK3);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7);
+    doc.text('UNIT', tbX + 52, tbY + 18);
+    setText(doc, INK);
+    doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    doc.text('mm', tbX + 52, tbY + 24);
+
+    setText(doc, INK3);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7);
+    doc.text('DATE', tbX + 2, tbY + 22);
+    setText(doc, INK2);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8);
+    doc.text(new Date().toLocaleDateString('ko-KR'), tbX + 2, tbY + 27);
+
+    setText(doc, INK3);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7);
+    doc.text(`PAGE ${pageNum}/${totalPages}`, tbX + 52, tbY + 27);
+  }
+
+  // 상단 헤더 (간단)
+  function drawHeader(doc, pw, title, subtitle){
+    setText(doc, INK);
+    doc.setFont('helvetica','bold'); doc.setFontSize(14);
+    doc.text(title, margin, margin + 6);
+
+    setText(doc, INK3);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    doc.text(subtitle, margin, margin + 13);
+
+    setStroke(doc, HAIR, 0.3);
+    doc.line(margin, margin + 16, pw - margin, margin + 16);
+  }
+
+  // 범례 (우측 상단)
+  function drawLegend(doc, x, y){
+    setStroke(doc, CUT_COLOR, 0.5);
+    doc.line(x, y, x + 12, y);
+    setText(doc, INK2);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8);
+    doc.text('CUT (재단)', x + 14, y + 1);
+
+    setStroke(doc, CREASE_COLOR, 0.3);
+    drawDashedLine(doc, x, y + 6, x + 12, y + 6);
+    doc.text('CREASE (접힘)', x + 14, y + 7);
+  }
+
+  // ====================================================
+  // Page 1: Master Box Dieline (실제 1:1 스케일)
+  // ====================================================
+  const pw1 = doc.internal.pageSize.getWidth();
+  const ph1 = doc.internal.pageSize.getHeight();
+
+  drawHeader(doc, pw1,
+    'MASTER BOX DIELINE',
+    `RSC  ${fmt(r.L)} × ${fmt(r.W)} × ${fmt(r.H)} mm   ·   Scale 1:1   ·   ${fmt1.name.toUpperCase()} ${fmt1.orient}`);
+
+  drawLegend(doc, pw1 - margin - 55, margin + 4);
+
+  // 도면 원점: 상단 헤더 + 치수선 여백을 피해 중앙 정렬
+  const availW = pw1 - margin*2;
+  const availH = ph1 - margin*2 - titleBlockH - 25;  // 헤더 16 + dim 9
+  const originX = margin + Math.max(20, (availW - mTotalW) / 2) + glueFlap;
+  const originY = margin + 25 + Math.max(20, (availH - mTotalH) / 2) + maxFlapH;
+
+  // 본체 시작점 (글루 플랩 직후)
+  const startX = originX;
+  const bodyY = originY;
+  const bodyH = r.H;
+
+  // === 1. 글루 플랩 (사다리꼴) - CUT
+  setStroke(doc, CUT_COLOR, 0.5);
+  const gx = startX - glueFlap;
+  doc.lines([
+    [glueFlap, -glueTaper],     // 좌상
+    [0, bodyH + glueTaper*2],   // ... wait, lines uses relative deltas
+  ], gx, bodyY + glueTaper, [1, 1], null, false);
+  // lines() is unreliable for complex shapes, use manual line segments:
+  doc.line(gx, bodyY + glueTaper, startX, bodyY);                          // top diagonal
+  doc.line(startX, bodyY, startX, bodyY + bodyH);                          // right (body connection)
+  doc.line(startX, bodyY + bodyH, gx, bodyY + bodyH - glueTaper);          // bottom diagonal
+  doc.line(gx, bodyY + glueTaper, gx, bodyY + bodyH - glueTaper);          // left
+
+  // 글루 라벨
+  setText(doc, INK3);
+  doc.setFont('helvetica','bold'); doc.setFontSize(7);
+  doc.text('GLUE', gx + glueFlap/2, bodyY + bodyH/2 - 1.5, {align:'center'});
+  doc.text('FLAP', gx + glueFlap/2, bodyY + bodyH/2 + 2, {align:'center'});
+
+  // === 2. 본체 4패널 + 상/하 플랩
+  let curX = startX;
+  for(const p of panels){
+    const pw = p.w;
+    const fh = p.flap;
+
+    // 상단 플랩 (슬롯 인셋)
+    setStroke(doc, CUT_COLOR, 0.5);
+    const sH = slotW/2;
+    doc.line(curX + sH, bodyY - fh, curX + pw - sH, bodyY - fh);       // top
+    doc.line(curX + sH, bodyY - fh, curX + sH, bodyY);                  // left slot
+    doc.line(curX + pw - sH, bodyY - fh, curX + pw - sH, bodyY);        // right slot
+
+    // 본체 패널 좌우 (겹치는 선은 마지막에 crease로)
+    doc.line(curX, bodyY, curX, bodyY + bodyH);                         // left edge of panel
+    // 우측은 다음 패널이 이어서 그림. 마지막 패널만 직접.
+
+    // 하단 플랩
+    doc.line(curX + sH, bodyY + bodyH, curX + sH, bodyY + bodyH + fh);
+    doc.line(curX + pw - sH, bodyY + bodyH, curX + pw - sH, bodyY + bodyH + fh);
+    doc.line(curX + sH, bodyY + bodyH + fh, curX + pw - sH, bodyY + bodyH + fh);
+
+    curX += pw;
+  }
+  // 본체 우측 마지막 세로선
+  setStroke(doc, CUT_COLOR, 0.5);
+  doc.line(curX, bodyY, curX, bodyY + bodyH);
+
+  // 본체 상/하단 경계 (접힘선이 아닌 본체 자체의 외곽선도 없음 - 플랩이 이어지므로)
+  // 실제로는 본체 상/하단 경계가 crease 역할
+
+  // === 3. 접힘선 (CREASE - 빨간 점선)
+  setStroke(doc, CREASE_COLOR, 0.3);
+  // 가로 접힘선 (본체-플랩 경계) - 글루 본체까지
+  drawDashedLine(doc, startX, bodyY, startX + mBodyW, bodyY);
+  drawDashedLine(doc, startX, bodyY + bodyH, startX + mBodyW, bodyY + bodyH);
+  // 글루 플랩-본체 경계
+  drawDashedLine(doc, startX, bodyY, startX, bodyY + bodyH);
+  // 패널 간 경계
+  let xc = startX;
+  for(let i = 0; i < 3; i++){
+    xc += panels[i].w;
+    drawDashedLine(doc, xc, bodyY, xc, bodyY + bodyH);
+  }
+
+  // === 4. 패널 라벨 (얇게)
+  setText(doc, INK3);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  curX = startX;
+  for(const p of panels){
+    const pw = p.w;
+    doc.text(p.name, curX + pw/2, bodyY + bodyH/2 - 2, {align:'center'});
+    setText(doc, INK4);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7);
+    doc.text(`${fmt(p.w)} × ${fmt(r.H)}`, curX + pw/2, bodyY + bodyH/2 + 2, {align:'center'});
+    setText(doc, INK3);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8);
+    curX += pw;
+  }
+
+  // === 5. 치수선 (상단 가로)
+  const dimYTop = bodyY - maxFlapH - 6;
+  dimH(doc, startX - glueFlap, startX, dimYTop, String(glueFlap));
+  curX = startX;
+  for(const p of panels){
+    dimH(doc, curX, curX + p.w, dimYTop, fmt(p.w));
+    curX += p.w;
+  }
+  // 전체 가로 (한 단계 더 위)
+  dimH(doc, startX - glueFlap, startX + mBodyW, dimYTop - 6, `TOTAL ${fmt(mTotalW)}`);
+
+  // 우측 세로: H
+  const dimXRight = startX + mBodyW + 8;
+  dimV(doc, bodyY, bodyY + bodyH, dimXRight, `H=${fmt(r.H)}`);
+  dimV(doc, bodyY - maxFlapH, bodyY, dimXRight, fmt(maxFlapH));
+  dimV(doc, bodyY + bodyH, bodyY + bodyH + maxFlapH, dimXRight, fmt(maxFlapH));
+
+  // === 6. 타이틀 블록
+  drawTitleBlock(doc, pw1, ph1,
+    'MASTER BOX',
+    `${fmt(r.L)} × ${fmt(r.W)} × ${fmt(r.H)}`,
+    1, 2);
+
+  // ====================================================
+  // Page 2: Cross Pad Dieline (실제 1:1 스케일)
+  // ====================================================
+  doc.addPage(fmt2.name, fmt2.orient);
+  const pw2 = doc.internal.pageSize.getWidth();
+  const ph2 = doc.internal.pageSize.getHeight();
+
+  drawHeader(doc, pw2,
+    'CROSS PAD DIELINE',
+    `Base + 4 sides  L"=${fmt(r.Ld)}  W"=${fmt(r.Wd)}  H"=${fmt(r.Hd)} mm   ·   Scale 1:1   ·   ${fmt2.name.toUpperCase()} ${fmt2.orient}`);
+
+  drawLegend(doc, pw2 - margin - 55, margin + 4);
+
+  // 십자패드 원점
+  const availW2 = pw2 - margin*2;
+  const availH2 = ph2 - margin*2 - titleBlockH - 25;
+  const cPadX = margin + Math.max(20, (availW2 - cBodyW) / 2);
+  const cPadY = margin + 25 + Math.max(20, (availH2 - cBodyH) / 2);
+
+  const Ld = r.Ld, Wd = r.Wd, Hd = r.Hd;
+  const baseX = cPadX + Hd;
+  const baseY = cPadY + Hd;
+
+  // === 4개 측면 (CUT)
+  setStroke(doc, CUT_COLOR, 0.5);
+  // 위 측면 (L" × H")
+  doc.rect(baseX, cPadY, Ld, Hd);
+  // 아래 측면
+  doc.rect(baseX, baseY + Wd, Ld, Hd);
+  // 왼쪽 측면 (W" × H")
+  doc.rect(cPadX, baseY, Hd, Wd);
+  // 오른쪽 측면
+  doc.rect(baseX + Ld, baseY, Hd, Wd);
+
+  // === 바닥면 (CUT + 내부 라벨)
+  doc.rect(baseX, baseY, Ld, Wd);
+
+  // === 바닥-측면 접힘선 (CREASE)
+  setStroke(doc, CREASE_COLOR, 0.3);
+  drawDashedLine(doc, baseX, baseY, baseX + Ld, baseY);          // 위
+  drawDashedLine(doc, baseX, baseY + Wd, baseX + Ld, baseY + Wd); // 아래
+  drawDashedLine(doc, baseX, baseY, baseX, baseY + Wd);           // 좌
+  drawDashedLine(doc, baseX + Ld, baseY, baseX + Ld, baseY + Wd); // 우
+
+  // === 라벨
+  setText(doc, INK);
+  doc.setFont('helvetica','bold'); doc.setFontSize(11);
+  doc.text('BASE', baseX + Ld/2, baseY + Wd/2 - 3, {align:'center'});
+  setText(doc, INK3);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  doc.text(`${fmt(Ld)} × ${fmt(Wd)}`, baseX + Ld/2, baseY + Wd/2 + 2, {align:'center'});
+
+  doc.text('Side (top)', baseX + Ld/2, cPadY + Hd/2, {align:'center'});
+  doc.text('Side (bottom)', baseX + Ld/2, baseY + Wd + Hd/2, {align:'center'});
+  doc.text('Side (L)', cPadX + Hd/2, baseY + Wd/2, {align:'center'});
+  doc.text('Side (R)', baseX + Ld + Hd/2, baseY + Wd/2, {align:'center'});
+
+  // === 치수선
+  dimH(doc, baseX, baseX + Ld, baseY + Wd + Hd + 8, `L"=${fmt(Ld)}`);
+  dimV(doc, baseY, baseY + Wd, cPadX - 8, `W"=${fmt(Wd)}`);
+  dimV(doc, cPadY, baseY, cPadX + cBodyW + 8, `H"=${fmt(Hd)}`);
+
+  // 전체
+  dimH(doc, cPadX, cPadX + cBodyW, baseY + Wd + Hd + 16, `TOTAL ${fmt(cBodyW)}`);
+
+  drawTitleBlock(doc, pw2, ph2,
+    'CROSS PAD',
+    `${fmt(Ld)} × ${fmt(Wd)} × ${fmt(Hd)}`,
+    2, 2);
+
+  // 저장
+  const fname = `masterbox_${inp.mode}_${fmt(r.L)}x${fmt(r.W)}x${fmt(r.H)}_vector.pdf`;
+  doc.save(fname);
+}
+
+/* =========================================================
+   Lightbox (도면 미리보기 클릭 확대)
+   ========================================================= */
+(function(){
+  const LIGHTBOX_W = 2400;  // 라이트박스 캔버스 해상도 (고해상도)
+  const LIGHTBOX_H = 1640;
+  const ZOOM_LEVELS = [1, 1.5, 2, 3];
+  let zoomIdx = 0;
+  let panX = 0, panY = 0;
+  let isDragging = false;
+  let lastMx = 0, lastMy = 0;
+
+  const lightbox = document.getElementById('lightbox');
+  const content = document.getElementById('lightboxContent');
+  const canvasWrap = document.getElementById('lightboxCanvasWrap');
+  const canvas = document.getElementById('lightboxCanvas');
+  const zoomLabel = document.getElementById('lightboxZoom');
+
+  function applyTransform(){
+    const z = ZOOM_LEVELS[zoomIdx];
+    canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${z})`;
+    if(zoomLabel) zoomLabel.textContent = `${Math.round(z * 100)}%`;
+  }
+
+  function open(){
+    if(!state.computed || !state.lastResult) return;
+    lightbox.classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    // 고해상도 렌더
+    const ctx = canvas.getContext('2d');
+    const DPR = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = LIGHTBOX_W * DPR;
+    canvas.height = LIGHTBOX_H * DPR;
+    canvas.style.width = LIGHTBOX_W + 'px';
+    canvas.style.height = LIGHTBOX_H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    renderDrawing(ctx, LIGHTBOX_W, LIGHTBOX_H, state.lastInput, state.lastResult);
+
+    // 라이트박스 영역에 맞춰 초기 위치/줌 리셋
+    zoomIdx = 0; panX = 0; panY = 0;
+    applyTransform();
+
+    // 라이트박스 캔버스 wrap 크기에 맞춰 canvas가 width:100%되도록 스타일 조정
+    const wrapW = canvasWrap.clientWidth;
+    const wrapH = canvasWrap.clientHeight;
+    const fitScale = Math.min(wrapW / LIGHTBOX_W, wrapH / LIGHTBOX_H);
+    canvas.style.width = (LIGHTBOX_W * fitScale) + 'px';
+    canvas.style.height = (LIGHTBOX_H * fitScale) + 'px';
+  }
+
+  function close(){
+    lightbox.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  function zoomIn(){
+    if(zoomIdx < ZOOM_LEVELS.length - 1){
+      zoomIdx++;
+      applyTransform();
+    }
+  }
+  function zoomOut(){
+    if(zoomIdx > 0){
+      zoomIdx--;
+      if(zoomIdx === 0){ panX = 0; panY = 0; }
+      applyTransform();
+    }
+  }
+  function reset(){
+    zoomIdx = 0; panX = 0; panY = 0;
+    applyTransform();
+  }
+
+  // 미리보기 영역 클릭
+  const previewWrap = document.getElementById('previewWrap');
+  if(previewWrap){
+    previewWrap.addEventListener('click', (e)=>{
+      // 버튼 등이 아니라 미리보기 영역을 클릭한 경우만
+      if(e.target.closest('.btn')) return;
+      open();
+    });
+  }
+
+  // 닫기
+  document.getElementById('lightboxClose').addEventListener('click', close);
+  // 배경 클릭 시 닫기 (content 내부 클릭은 제외)
+  lightbox.addEventListener('click', (e)=>{
+    if(e.target === lightbox || e.target.classList.contains('lightbox-inner')) close();
+  });
+  // ESC
+  window.addEventListener('keydown', (e)=>{
+    if(!lightbox.classList.contains('show')) return;
+    if(e.key === 'Escape') close();
+    else if(e.key === '+' || e.key === '=') zoomIn();
+    else if(e.key === '-' || e.key === '_') zoomOut();
+    else if(e.key === '0') reset();
+  });
+
+  // 줌 버튼
+  document.getElementById('lightboxZoomIn').addEventListener('click', zoomIn);
+  document.getElementById('lightboxZoomOut').addEventListener('click', zoomOut);
+  document.getElementById('lightboxReset').addEventListener('click', reset);
+
+  // 휠 줌
+  content.addEventListener('wheel', (e)=>{
+    e.preventDefault();
+    if(e.deltaY < 0) zoomIn();
+    else zoomOut();
+  }, {passive:false});
+
+  // 드래그 팬 (줌 > 1 일때만)
+  content.addEventListener('mousedown', (e)=>{
+    if(ZOOM_LEVELS[zoomIdx] <= 1) return;
+    isDragging = true;
+    lastMx = e.clientX; lastMy = e.clientY;
+    content.classList.add('grabbing');
+  });
+  window.addEventListener('mousemove', (e)=>{
+    if(!isDragging) return;
+    panX += e.clientX - lastMx;
+    panY += e.clientY - lastMy;
+    lastMx = e.clientX; lastMy = e.clientY;
+    applyTransform();
+  });
+  window.addEventListener('mouseup', ()=>{
+    isDragging = false;
+    content.classList.remove('grabbing');
+  });
+
+  // 터치 (모바일 간단 팬)
+  content.addEventListener('touchstart', (e)=>{
+    if(ZOOM_LEVELS[zoomIdx] <= 1) return;
+    if(e.touches.length === 1){
+      isDragging = true;
+      lastMx = e.touches[0].clientX;
+      lastMy = e.touches[0].clientY;
+    }
+  }, {passive:true});
+  content.addEventListener('touchmove', (e)=>{
+    if(!isDragging || e.touches.length !== 1) return;
+    e.preventDefault();
+    panX += e.touches[0].clientX - lastMx;
+    panY += e.touches[0].clientY - lastMy;
+    lastMx = e.touches[0].clientX;
+    lastMy = e.touches[0].clientY;
+    applyTransform();
+  }, {passive:false});
+  content.addEventListener('touchend', ()=>{ isDragging = false; });
+})();
+</script>
+
+</body>
+</html>
