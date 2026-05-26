@@ -2334,6 +2334,11 @@
     resize();
     addEventListener('resize',resize);
 
+    // Subtle pointer interaction
+    let mx=-9999,my=-9999;
+    addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY;},{passive:true});
+    addEventListener('pointerout',()=>{mx=my=-9999;},{passive:true});
+
     class Petal{
       constructor(seedY){
         this.reset(seedY);
@@ -2355,6 +2360,14 @@
       update(t){
         this.y+=this.vy;
         this.x+=this.vx+Math.sin(this.swayBase+t*this.swaySpeed)*this.sway;
+        // gentle repulsion from the cursor
+        const dx=this.x-mx, dy=this.y-my, R=110;
+        const d2=dx*dx+dy*dy;
+        if(d2<R*R){
+          const d=Math.sqrt(d2)||1;
+          const f=(1-d/R)*0.9;
+          this.x+=(dx/d)*f; this.y+=(dy/d)*f;
+        }
         this.angle+=this.va;
         if(this.y>H+30||this.x<-40||this.x>W+40) this.reset();
       }
