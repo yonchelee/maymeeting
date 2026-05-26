@@ -63,13 +63,6 @@
   }
   .serif{font-family:'Playfair Display','Gowun Batang','Noto Serif KR',serif;font-weight:700;letter-spacing:-.01em;}
 
-  /* ===== Falling petals canvas ===== */
-  #petals-canvas{
-    position:fixed;inset:0;width:100%;height:100%;
-    pointer-events:none;z-index:50;
-    transition:opacity .9s ease;
-  }
-
   /* ===== Progress bar ===== */
   .progress{
     position:fixed;top:0;left:0;height:3px;width:0%;
@@ -1983,9 +1976,6 @@
 <!-- Progress bar -->
 <div class="progress" id="progress"></div>
 
-<!-- Petal canvas -->
-<canvas id="petals-canvas"></canvas>
-
 <!-- Side navigation -->
 <nav class="nav-dots" id="navDots">
   <button class="nav-dot active" data-target="intro" data-label="Intro"></button>
@@ -2374,99 +2364,6 @@
 </div>
 
 <script>
-  /* ========== Falling petals (Canvas) ========== */
-  (function(){
-    const canvas=document.getElementById('petals-canvas');
-    const ctx=canvas.getContext('2d');
-    let W=0,H=0,petals=[];
-    const COLORS=['#EC9DAB','#E07489','#D24B6A','#B22D52','#F6C6CE'];
-
-    function resize(){
-      W=canvas.width=innerWidth;
-      H=canvas.height=innerHeight;
-    }
-    resize();
-    addEventListener('resize',resize);
-
-    // Subtle pointer interaction
-    let mx=-9999,my=-9999;
-    addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY;},{passive:true});
-    addEventListener('pointerout',()=>{mx=my=-9999;},{passive:true});
-
-    class Petal{
-      constructor(seedY){
-        this.reset(seedY);
-      }
-      reset(seedY){
-        this.x=Math.random()*W;
-        this.y=seedY!==undefined?seedY:-40;
-        this.size=8+Math.random()*12;
-        this.vy=0.45+Math.random()*1.05;
-        this.vx=(Math.random()-.5)*.7;
-        this.angle=Math.random()*Math.PI*2;
-        this.va=(Math.random()-.5)*.035;
-        this.sway=1+Math.random()*3.2;
-        this.swaySpeed=.006+Math.random()*.01;
-        this.swayBase=Math.random()*Math.PI*2;
-        this.opacity=.42+Math.random()*.34;
-        this.color=COLORS[(Math.random()*COLORS.length)|0];
-      }
-      update(t){
-        this.y+=this.vy;
-        this.x+=this.vx+Math.sin(this.swayBase+t*this.swaySpeed)*this.sway;
-        // cursor repulsion — 표지 페이지에서만
-        if(window.__petalsActive){
-          const dx=this.x-mx, dy=this.y-my, R=140;
-          const d2=dx*dx+dy*dy;
-          if(d2<R*R){
-            const d=Math.sqrt(d2)||1;
-            const f=(1-d/R)*2.6;
-            this.x+=(dx/d)*f; this.y+=(dy/d)*f;
-          }
-        }
-        this.angle+=this.va;
-        if(this.y>H+30||this.x<-40||this.x>W+40) this.reset();
-      }
-      draw(){
-        ctx.save();
-        ctx.translate(this.x,this.y);
-        ctx.rotate(this.angle);
-        ctx.globalAlpha=this.opacity;
-        const s=this.size;
-        // Rose petal: wide rounded body with a soft notch at the tip
-        ctx.fillStyle=this.color;
-        ctx.beginPath();
-        ctx.moveTo(0,s*.9);
-        ctx.bezierCurveTo(-s*1.0,s*.2, -s*.55,-s*.7, -s*.1,-s*.5);
-        ctx.quadraticCurveTo(0,-s*.68, s*.1,-s*.5);
-        ctx.bezierCurveTo(s*.55,-s*.7, s*1.0,s*.2, 0,s*.9);
-        ctx.closePath();
-        ctx.fill();
-        // center vein for a rose-petal look
-        ctx.globalAlpha=this.opacity*.4;
-        ctx.strokeStyle='rgba(110,58,69,.7)';
-        ctx.lineWidth=Math.max(.6,s*.05);
-        ctx.beginPath();
-        ctx.moveTo(0,s*.72);
-        ctx.lineTo(0,-s*.42);
-        ctx.stroke();
-        ctx.restore();
-      }
-    }
-
-    const count=Math.min(42,Math.floor(W/34));
-    for(let i=0;i<count;i++) petals.push(new Petal(Math.random()*H));
-
-    let t0=performance.now();
-    function loop(now){
-      const t=(now-t0)/16;
-      ctx.clearRect(0,0,W,H);
-      petals.forEach(p=>{p.update(t);p.draw();});
-      requestAnimationFrame(loop);
-    }
-    requestAnimationFrame(loop);
-  })();
-
   /* ========== Reveal on scroll ========== */
   (function(){
     const els=document.querySelectorAll('.reveal');
@@ -2493,10 +2390,6 @@
       });
     });
 
-    // 표지(커버) 페이지에서만 꽃잎/마우스 반응을 살림
-    const COVERS=new Set(['intro','farewell','battery','ai','cmfax','gwp','closing']);
-    const canvas=document.getElementById('petals-canvas');
-
     // Active state via IO
     const io=new IntersectionObserver((entries)=>{
       entries.forEach(e=>{
@@ -2505,9 +2398,6 @@
           dots.forEach(d=>{
             d.classList.toggle('active',d.dataset.target===id);
           });
-          const onCover=COVERS.has(id);
-          window.__petalsActive=onCover;
-          if(canvas) canvas.style.opacity=onCover?'1':'0.12';
         }
       });
     },{threshold:.55});
