@@ -1897,6 +1897,34 @@
     .fw-people,.fw-cards{grid-template-columns:1fr;gap:32px;}
   }
 
+  /* ===== Agenda / 목차 ===== */
+  #agenda{
+    background:
+      radial-gradient(ellipse at 18% 0%,var(--sakura-100) 0%,transparent 55%),
+      radial-gradient(ellipse at 82% 100%,var(--ocean-50) 0%,transparent 55%),
+      var(--paper);
+  }
+  #agenda .wrap{display:flex;flex-direction:column;align-items:center;text-align:center;}
+  .toc-list{
+    width:100%;max-width:740px;margin-top:36px;
+    display:flex;flex-direction:column;gap:14px;text-align:left;
+  }
+  .toc-item{
+    display:flex;align-items:center;gap:22px;
+    background:var(--paper);border:1px solid var(--sakura-100);
+    border-left:4px solid var(--sakura-500);
+    border-radius:14px;padding:18px 26px;box-shadow:var(--shadow-sm);
+    transition:transform .3s ease,box-shadow .3s ease;
+  }
+  .toc-item:hover{transform:translateX(5px);box-shadow:var(--shadow-md);}
+  .toc-num{
+    flex:none;width:42px;
+    font-family:'Playfair Display','Gowun Batang',serif;
+    font-size:24px;font-weight:700;color:var(--sakura-500);
+  }
+  .toc-t{font-size:clamp(18px,1.8vw,23px);font-weight:700;color:var(--ink-900);}
+  .toc-d{font-size:14px;color:var(--ink-500);margin-top:3px;}
+
   /* ===== GWP ===== */
   #gwp,#gwp-goal,#gwp-activity,#gwp-timeline{
     background:
@@ -1979,6 +2007,7 @@
 <!-- Side navigation -->
 <nav class="nav-dots" id="navDots">
   <button class="nav-dot active" data-target="intro" data-label="Intro"></button>
+  <button class="nav-dot" data-target="agenda" data-label="목차"></button>
   <button class="nav-dot" data-target="video" data-label="오프닝 영상"></button>
   <button class="nav-dot" data-target="farewell" data-label="Farewell"></button>
   <button class="nav-dot" data-target="battery" data-label="배터리 안전사고 예방"></button>
@@ -2011,6 +2040,36 @@
     <p class="intro-sub reveal d3">장미가 피어나는 5월,<br><strong>새로운 시작</strong>과 함께하는 한 달</p>
   </div>
   <div class="scroll-cue">SCROLL ↓</div>
+</section>
+
+<!-- ============ 1-1. AGENDA / 목차 ============ -->
+<section id="agenda">
+  <div class="wrap">
+    <span class="eyebrow reveal">AGENDA · 목차</span>
+    <h2 class="reveal d1">오늘 <span class="accent">함께 볼 내용</span></h2>
+    <div class="toc-list reveal d2">
+      <div class="toc-item">
+        <span class="toc-num">01</span>
+        <div><div class="toc-t">오프닝 영상</div><div class="toc-d">한 달을 여는 짧은 영상</div></div>
+      </div>
+      <div class="toc-item">
+        <span class="toc-num">02</span>
+        <div><div class="toc-t">Farewell</div><div class="toc-d">두 분께 드리는 감사 인사</div></div>
+      </div>
+      <div class="toc-item">
+        <span class="toc-num">03</span>
+        <div><div class="toc-t">배터리 안전사고 예방</div><div class="toc-d">사고 공유 · 원인 · 재발방지 대책</div></div>
+      </div>
+      <div class="toc-item">
+        <span class="toc-num">04</span>
+        <div><div class="toc-t">선행CMF1파트 AX 활용</div><div class="toc-d">MetaliX 플랫폼 소개</div></div>
+      </div>
+      <div class="toc-item">
+        <span class="toc-num">05</span>
+        <div><div class="toc-t">2분기 GWP</div><div class="toc-d">AI와 함께하는 GWP · 6/18 (목)</div></div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- ============ 2. OPENING VIDEO ============ -->
