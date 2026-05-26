@@ -52,6 +52,15 @@
     letter-spacing:-.01em;
     -webkit-font-smoothing:antialiased;
   }
+  body::before{
+    content:'';
+    position:fixed;
+    inset:clamp(10px,1.6vw,22px);
+    border:1px solid var(--sakura-200);
+    border-radius:3px;
+    pointer-events:none;
+    z-index:90;
+  }
   .serif{font-family:'Playfair Display','Gowun Batang','Noto Serif KR',serif;font-weight:700;letter-spacing:-.01em;}
 
   /* ===== Falling petals canvas ===== */
@@ -136,7 +145,8 @@
 
   h1,h2{font-family:'Playfair Display','Gowun Batang','Noto Serif KR',serif;font-weight:700;letter-spacing:-.01em;line-height:1.1;}
   h2{font-size:clamp(42px,5.6vw,78px);font-weight:700;margin-bottom:22px;}
-  h2 .accent{color:var(--sakura-500);}
+  h2 .accent{color:var(--sakura-600);font-style:italic;}
+  .game-hero .accent{font-style:italic;}
   .sub{font-size:clamp(15px,1.4vw,18px);color:var(--ink-500);max-width:640px;margin-bottom:56px;}
 
   /* ===== Reveal animation ===== */
@@ -215,14 +225,23 @@
     margin-bottom:24px;
   }
   .intro-title{
-    font-size:clamp(64px,10vw,140px);
-    font-weight:700;
-    line-height:1;
-    margin-bottom:24px;
+    font-family:'Playfair Display','Gowun Batang',serif;
+    font-size:clamp(108px,23vw,330px);
+    font-weight:900;
+    line-height:.82;
+    letter-spacing:-.04em;
+    margin-bottom:10px;
     background:linear-gradient(135deg,var(--ink-900) 0%,var(--sakura-600) 55%,var(--sakura-500) 100%);
     -webkit-background-clip:text;
     background-clip:text;
     -webkit-text-fill-color:transparent;
+  }
+  .intro-title-ko{
+    font-size:clamp(26px,4.2vw,52px);
+    font-weight:700;
+    letter-spacing:.06em;
+    color:var(--ink-900);
+    margin-bottom:18px;
   }
   .intro-sub{
     font-size:clamp(14px,1.3vw,16px);
@@ -1731,8 +1750,9 @@
 <!-- ============ 1. INTRO ============ -->
 <section id="intro">
   <div class="wrap">
-    <div class="intro-date reveal">2026 · MAY · 선행기구개발그룹</div>
-    <h1 class="intro-title serif reveal d1">5월 월례회</h1>
+    <div class="intro-date reveal">2026 · 선행기구개발그룹</div>
+    <h1 class="intro-title reveal d1">MAY</h1>
+    <div class="intro-title-ko serif reveal d2">5월 월례회</div>
     <div class="intro-rule reveal d2" aria-hidden="true"></div>
     <p class="intro-sub reveal d3">장미가 피어나는 5월,<br><strong>새로운 시작</strong>과 함께하는 한 달</p>
   </div>
