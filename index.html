@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&family=Gowun+Batang:wght@400;700&family=Noto+Serif+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --sakura-50:#FFF5F7;
@@ -44,7 +44,7 @@
     scroll-padding-top:0;
   }
   body{
-    font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,sans-serif;
+    font-family:'Gowun Batang','Pretendard Variable',Pretendard,serif;
     color:var(--ink-900);
     background:var(--paper);
     overflow-x:hidden;
@@ -52,7 +52,7 @@
     letter-spacing:-.01em;
     -webkit-font-smoothing:antialiased;
   }
-  .serif{font-family:'Noto Serif KR',serif;font-weight:500;letter-spacing:-.02em;}
+  .serif{font-family:'Playfair Display','Gowun Batang','Noto Serif KR',serif;font-weight:700;letter-spacing:-.01em;}
 
   /* ===== Falling petals canvas ===== */
   #petals-canvas{
@@ -119,20 +119,23 @@
 
   .eyebrow{
     display:inline-block;
-    font-size:12px;font-weight:600;
-    letter-spacing:.22em;
-    color:var(--sakura-500);
+    font-family:'Playfair Display','Noto Serif KR',serif;
+    font-style:italic;
+    font-size:clamp(15px,1.5vw,19px);font-weight:500;
+    letter-spacing:.14em;
+    color:var(--sakura-600);
     text-transform:uppercase;
-    margin-bottom:20px;
-    padding:6px 14px;
-    border:1px solid var(--sakura-200);
-    border-radius:100px;
-    background:rgba(255,230,236,.6);
-    backdrop-filter:blur(8px);
+    margin-bottom:18px;
+    padding:0 0 7px;
+    border:none;
+    border-bottom:1.5px solid var(--sakura-300);
+    border-radius:0;
+    background:none;
+    backdrop-filter:none;
   }
 
-  h1,h2{letter-spacing:-.03em;line-height:1.15;}
-  h2{font-size:clamp(36px,5vw,64px);font-weight:700;margin-bottom:20px;}
+  h1,h2{font-family:'Playfair Display','Gowun Batang','Noto Serif KR',serif;font-weight:700;letter-spacing:-.01em;line-height:1.1;}
+  h2{font-size:clamp(42px,5.6vw,78px);font-weight:700;margin-bottom:22px;}
   h2 .accent{color:var(--sakura-500);}
   .sub{font-size:clamp(15px,1.4vw,18px);color:var(--ink-500);max-width:640px;margin-bottom:56px;}
 
@@ -204,14 +207,16 @@
     transform:scale(1.08);
   }
   .intro-date{
-    font-size:13px;font-weight:500;
-    color:var(--sakura-500);
-    letter-spacing:.3em;
-    margin-bottom:28px;
+    font-family:'Playfair Display','Noto Serif KR',serif;
+    font-style:italic;
+    font-size:clamp(14px,1.4vw,17px);font-weight:500;
+    color:var(--sakura-600);
+    letter-spacing:.18em;
+    margin-bottom:24px;
   }
   .intro-title{
     font-size:clamp(64px,10vw,140px);
-    font-weight:300;
+    font-weight:700;
     line-height:1;
     margin-bottom:24px;
     background:linear-gradient(135deg,var(--ink-900) 0%,var(--sakura-600) 55%,var(--sakura-500) 100%);
@@ -385,14 +390,17 @@
     display:inline-flex;
     align-items:center;
     gap:10px;
-    padding:8px 18px;
-    background:rgba(255,255,255,0.85);
-    backdrop-filter:blur(6px);
-    border:1px solid var(--sakura-200);
-    border-radius:999px;
-    font-size:12px;
+    padding:0 0 7px;
+    background:none;
+    backdrop-filter:none;
+    border:none;
+    border-bottom:1.5px solid var(--sakura-300);
+    border-radius:0;
+    font-family:'Playfair Display','Noto Serif KR',serif;
+    font-style:italic;
+    font-size:clamp(14px,1.4vw,18px);
     color:var(--sakura-600);
-    letter-spacing:.18em;
+    letter-spacing:.14em;
     text-transform:uppercase;
     font-weight:500;
   }
@@ -855,7 +863,7 @@
   }
   .congrats-header .eyebrow{
     color:var(--sakura-600);
-    border-color:var(--sakura-300);
+    border-bottom-color:var(--sakura-300);
   }
   .congrats-header h2{
     margin-top:10px;
@@ -1000,8 +1008,10 @@
   }
   .qr-eyebrow{
     display:inline-block;
-    font-size:11px;font-weight:600;
-    letter-spacing:.25em;
+    font-family:'Playfair Display','Noto Serif KR',serif;
+    font-style:italic;
+    font-size:clamp(14px,1.4vw,18px);font-weight:500;
+    letter-spacing:.14em;text-transform:uppercase;
     color:var(--sakura-600);
     margin-bottom:14px;
   }
@@ -1596,8 +1606,8 @@
     margin-bottom:40px;opacity:.9;
   }
   .closing-title{
-    font-size:clamp(40px,6vw,80px);
-    font-weight:400;
+    font-size:clamp(44px,6.2vw,86px);
+    font-weight:700;
     margin-bottom:20px;
     color:var(--ink-900);
   }
@@ -1617,13 +1627,14 @@
   .closing-quote::before{
     content:'"';
     position:absolute;top:-8px;left:24px;
-    font-family:'Noto Serif KR',serif;
-    font-size:80px;color:var(--sakura-300);
+    font-family:'Playfair Display',serif;
+    font-style:italic;
+    font-size:96px;color:var(--sakura-300);
     line-height:1;
   }
   .closing-quote p{
-    font-family:'Noto Serif KR',serif;
-    font-size:17px;
+    font-family:'Gowun Batang','Noto Serif KR',serif;
+    font-size:18px;
     color:var(--ink-700);
     line-height:1.9;
     font-weight:400;
