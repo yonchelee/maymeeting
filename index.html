@@ -1843,6 +1843,50 @@
     .bat-checks{grid-template-columns:1fr 1fr;}
   }
 
+  /* ===== Farewell ===== */
+  #farewell,#farewell-intro{
+    background:
+      radial-gradient(ellipse at 18% 0%,var(--sakura-100) 0%,transparent 55%),
+      radial-gradient(ellipse at 82% 100%,var(--cream) 0%,transparent 55%),
+      var(--paper);
+  }
+  #farewell .wrap,#farewell-intro .wrap{display:flex;flex-direction:column;align-items:center;text-align:center;}
+  .fw-people,.fw-cards{
+    display:grid;grid-template-columns:1fr 1fr;
+    gap:clamp(28px,6vw,90px);
+    width:100%;max-width:900px;margin-top:36px;
+  }
+  .fw-person,.fw-card{display:flex;flex-direction:column;align-items:center;}
+  .fw-photo{
+    width:100%;max-width:330px;aspect-ratio:1056/755;
+    object-fit:cover;border-radius:16px;
+    border:5px solid var(--paper);
+    box-shadow:var(--shadow-lg);
+  }
+  .fw-card{
+    background:var(--paper);border:1px solid var(--sakura-100);
+    border-radius:20px;padding:30px 26px;box-shadow:var(--shadow-md);
+  }
+  .fw-card .fw-photo{max-width:100%;}
+  .fw-name,.fw-card-name{
+    font-family:'Playfair Display','Gowun Batang',serif;
+    font-size:clamp(22px,2.4vw,30px);font-weight:700;
+    margin-top:20px;color:var(--ink-900);
+  }
+  .fw-name span,.fw-card-name span{font-size:.62em;color:var(--sakura-600);font-weight:600;margin-left:4px;}
+  .fw-meta{margin-top:8px;font-size:clamp(14px,1.4vw,17px);color:var(--ink-500);}
+  .fw-badges{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:18px;}
+  .fw-badge{
+    font-size:clamp(13px,1.3vw,15px);font-weight:600;
+    padding:8px 16px;border-radius:30px;
+    background:var(--cream);color:var(--ink-700);
+    border:1px solid var(--sakura-100);
+  }
+  .fw-badge.accent{background:var(--sakura-500);color:#fff;border-color:var(--sakura-500);}
+  @media (max-width:680px){
+    .fw-people,.fw-cards{grid-template-columns:1fr;gap:32px;}
+  }
+
   /* ===== MetaliX screenshot ===== */
   #metalix .wrap{display:flex;flex-direction:column;align-items:center;}
   .metalix-shot{
@@ -1894,6 +1938,8 @@
 <nav class="nav-dots" id="navDots">
   <button class="nav-dot active" data-target="intro" data-label="Intro"></button>
   <button class="nav-dot" data-target="video" data-label="오프닝 영상"></button>
+  <button class="nav-dot" data-target="farewell" data-label="Farewell"></button>
+  <button class="nav-dot" data-target="farewell-intro" data-label="두 분 소개"></button>
   <button class="nav-dot" data-target="battery" data-label="배터리 안전사고 예방"></button>
   <button class="nav-dot" data-target="bat-incident" data-label="배터리 · 사건 발생"></button>
   <button class="nav-dot" data-target="bat-cause" data-label="배터리 · 원인"></button>
@@ -1933,6 +1979,53 @@
     <div class="video-frame reveal d3" id="videoFrame" role="button" tabindex="0" aria-label="오프닝 영상 전체화면 재생">
       <div class="play-btn" aria-hidden="true"></div>
       <div class="video-label">▶ PLAY &middot; 전체화면</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAREWELL · 표지 ============ -->
+<section id="farewell">
+  <div class="wrap">
+    <span class="eyebrow reveal">FAREWELL</span>
+    <h2 class="reveal d1">그동안 <span class="accent">진심으로</span><br>감사했습니다</h2>
+    <p class="sub reveal d2" style="margin:18px auto 8px;">두 분의 오랜 헌신과 열정에<br>깊은 존경과 감사를 전합니다.</p>
+    <div class="fw-people reveal d3">
+      <div class="fw-person">
+        <img class="fw-photo" src="./lim.png" alt="임진만 수석" loading="lazy">
+        <div class="fw-name">임진만 <span>수석</span></div>
+        <div class="fw-meta">선행CMF3파트 · 근속 30년</div>
+      </div>
+      <div class="fw-person">
+        <img class="fw-photo" src="./song.png" alt="송영신 수석" loading="lazy">
+        <div class="fw-name">송영신 <span>수석</span></div>
+        <div class="fw-meta">NE파트 · 근속 26년</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAREWELL · 두 분 소개 ============ -->
+<section id="farewell-intro">
+  <div class="wrap">
+    <span class="eyebrow reveal">WITH GRATITUDE</span>
+    <h2 class="reveal d1">두 분을 <span class="accent">소개합니다</span></h2>
+    <div class="fw-cards reveal d2">
+      <div class="fw-card">
+        <img class="fw-photo" src="./lim.png" alt="임진만 수석" loading="lazy">
+        <div class="fw-card-name">임진만 <span>수석</span></div>
+        <div class="fw-badges">
+          <span class="fw-badge">소속 · 선행CMF3파트</span>
+          <span class="fw-badge accent">근속 30년</span>
+        </div>
+      </div>
+      <div class="fw-card">
+        <img class="fw-photo" src="./song.png" alt="송영신 수석" loading="lazy">
+        <div class="fw-card-name">송영신 <span>수석</span></div>
+        <div class="fw-badges">
+          <span class="fw-badge">소속 · NE파트</span>
+          <span class="fw-badge accent">근속 26년</span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
