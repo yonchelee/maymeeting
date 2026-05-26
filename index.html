@@ -67,6 +67,7 @@
   #petals-canvas{
     position:fixed;inset:0;width:100%;height:100%;
     pointer-events:none;z-index:50;
+    transition:opacity .9s ease;
   }
 
   /* ===== Progress bar ===== */
@@ -2312,13 +2313,15 @@
       update(t){
         this.y+=this.vy;
         this.x+=this.vx+Math.sin(this.swayBase+t*this.swaySpeed)*this.sway;
-        // gentle repulsion from the cursor
-        const dx=this.x-mx, dy=this.y-my, R=140;
-        const d2=dx*dx+dy*dy;
-        if(d2<R*R){
-          const d=Math.sqrt(d2)||1;
-          const f=(1-d/R)*2.6;
-          this.x+=(dx/d)*f; this.y+=(dy/d)*f;
+        // cursor repulsion — 표지 페이지에서만
+        if(window.__petalsActive){
+          const dx=this.x-mx, dy=this.y-my, R=140;
+          const d2=dx*dx+dy*dy;
+          if(d2<R*R){
+            const d=Math.sqrt(d2)||1;
+            const f=(1-d/R)*2.6;
+            this.x+=(dx/d)*f; this.y+=(dy/d)*f;
+          }
         }
         this.angle+=this.va;
         if(this.y>H+30||this.x<-40||this.x>W+40) this.reset();
@@ -2389,6 +2392,10 @@
       });
     });
 
+    // 표지(커버) 페이지에서만 꽃잎/마우스 반응을 살림
+    const COVERS=new Set(['intro','farewell','battery','ai','cmfax','closing']);
+    const canvas=document.getElementById('petals-canvas');
+
     // Active state via IO
     const io=new IntersectionObserver((entries)=>{
       entries.forEach(e=>{
@@ -2397,6 +2404,9 @@
           dots.forEach(d=>{
             d.classList.toggle('active',d.dataset.target===id);
           });
+          const onCover=COVERS.has(id);
+          window.__petalsActive=onCover;
+          if(canvas) canvas.style.opacity=onCover?'1':'0.12';
         }
       });
     },{threshold:.55});
