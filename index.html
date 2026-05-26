@@ -1904,6 +1904,41 @@
     .fw-people,.fw-cards{grid-template-columns:1fr;gap:32px;}
   }
 
+  /* ===== GWP ===== */
+  #gwp,#gwp-goal,#gwp-activity,#gwp-timeline{
+    background:
+      radial-gradient(ellipse at 18% 0%,var(--sakura-100) 0%,transparent 55%),
+      radial-gradient(ellipse at 82% 100%,var(--ocean-50) 0%,transparent 55%),
+      var(--paper);
+  }
+  #gwp .wrap,#gwp-goal .wrap,#gwp-activity .wrap,#gwp-timeline .wrap{
+    display:flex;flex-direction:column;align-items:center;text-align:center;
+  }
+  .gwp-tracks{
+    display:grid;grid-template-columns:1fr 1fr;gap:28px;
+    width:100%;max-width:900px;margin-top:34px;
+  }
+  .gwp-track{
+    text-align:left;background:var(--paper);
+    border:1px solid var(--sakura-100);border-radius:18px;
+    border-top:5px solid var(--ocean-500);
+    padding:30px 28px;box-shadow:var(--shadow-md);
+  }
+  .gwp-track:last-child{border-top-color:var(--sakura-500);}
+  .gwp-track .tlabel{
+    font-size:13px;font-weight:700;letter-spacing:.1em;
+    color:var(--ocean-600);margin-bottom:10px;
+  }
+  .gwp-track:last-child .tlabel{color:var(--sakura-600);}
+  .gwp-track h3{
+    font-family:'Playfair Display','Gowun Batang',serif;
+    font-size:clamp(20px,2vw,26px);font-weight:700;
+    margin-bottom:12px;color:var(--ink-900);
+  }
+  .gwp-track p{font-size:clamp(15px,1.4vw,17px);line-height:1.7;color:var(--ink-700);}
+  .gwp-track .ex{margin-top:12px;font-size:14px;color:var(--ink-500);}
+  @media (max-width:680px){.gwp-tracks{grid-template-columns:1fr;}}
+
   /* ===== MetaliX screenshot ===== */
   #metalix .wrap{display:flex;flex-direction:column;align-items:center;}
   .metalix-shot{
@@ -1970,6 +2005,10 @@
   <button class="nav-dot" data-target="ai" data-label="AI 활용"></button>
   <button class="nav-dot" data-target="cmfax" data-label="선행CMF1파트 AX활용"></button>
   <button class="nav-dot" data-target="metalix" data-label="MetaliX 플랫폼"></button>
+  <button class="nav-dot" data-target="gwp" data-label="GWP · 2분기"></button>
+  <button class="nav-dot" data-target="gwp-goal" data-label="GWP · 취지"></button>
+  <button class="nav-dot" data-target="gwp-activity" data-label="GWP · 활동"></button>
+  <button class="nav-dot" data-target="gwp-timeline" data-label="GWP · 타임라인"></button>
   <button class="nav-dot" data-target="closing" data-label="마무리"></button>
 </nav>
 
@@ -2227,6 +2266,68 @@
   </div>
 </section>
 
+<!-- ============ GWP · 표지 ============ -->
+<section id="gwp">
+  <div class="wrap">
+    <span class="eyebrow reveal">2026 2Q · GREAT WORK PLACE</span>
+    <h2 class="reveal d1">AI와 함께하는 <span class="accent">GWP</span></h2>
+    <p class="sub reveal d2" style="margin-left:auto;margin-right:auto;">그룹원이 AI로 직접 무언가를 만들어보는 하루,<br>그리고 파트가 함께 즐기는 저녁.</p>
+    <div class="bat-badge reveal d3">사무실 핸즈온 · 파트별 시연 · 파트별 석식</div>
+  </div>
+</section>
+
+<!-- ============ GWP · 취지 & 목표 ============ -->
+<section id="gwp-goal">
+  <div class="wrap">
+    <span class="eyebrow reveal">WHY GWP</span>
+    <h2 class="reveal d1">왜, <span class="accent-ocean">AI와 함께</span>인가</h2>
+    <p class="sub reveal d2" style="margin-left:auto;margin-right:auto;">도구로서의 AI를 실무에 체화하고, 만드는 즐거움으로 파트가 하나 됩니다.</p>
+    <div class="bat-grid-3 reveal d3" style="max-width:900px;">
+      <div class="bat-card"><h3>체화</h3><p>AI를 직접 써보며 실무에 바로 쓰는 감각을 익힙니다.</p></div>
+      <div class="bat-card"><h3>협업</h3><p>파트원이 함께 만들며 자연스럽게 팀워크를 다집니다.</p></div>
+      <div class="bat-card"><h3>즐거움</h3><p>결과물을 시연하고 베스트를 함께 축하합니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GWP · 메인 활동 (2트랙) ============ -->
+<section id="gwp-activity">
+  <div class="wrap">
+    <span class="eyebrow reveal">MAIN SESSION · 파트별 핸즈온</span>
+    <h2 class="reveal d1">두 가지를 <span class="accent">직접 만듭니다</span></h2>
+    <p class="sub reveal d2" style="margin-left:auto;margin-right:auto;">모든 파트가 두 트랙을 모두 경험합니다.</p>
+    <div class="gwp-tracks reveal d3">
+      <div class="gwp-track">
+        <div class="tlabel">TRACK A</div>
+        <h3>AI 생산성 아이템</h3>
+        <p>반복 업무를 줄여주는 나만의 도구를 AI로 제작합니다.</p>
+        <div class="ex">예) 자동 보고서, 데이터 정리, 검색·요약 도우미</div>
+      </div>
+      <div class="gwp-track">
+        <div class="tlabel">TRACK B</div>
+        <h3>미니 게임 개발</h3>
+        <p>AI 바이브코딩으로 간단한 게임을 만들어봅니다.</p>
+        <div class="ex">예) 사내에서 함께 즐길 수 있는 웹 미니게임</div>
+      </div>
+    </div>
+    <div class="bat-note reveal d4" style="max-width:900px;">결과물은 파트별 시연 후, 베스트 아이템을 선정해 시상합니다.</div>
+  </div>
+</section>
+
+<!-- ============ GWP · 타임라인 & 석식 ============ -->
+<section id="gwp-timeline">
+  <div class="wrap">
+    <span class="eyebrow reveal">HOW IT GOES</span>
+    <h2 class="reveal d1">오후부터 <span class="accent-ocean">저녁까지</span></h2>
+    <div class="bat-num-list reveal d2" style="max-width:760px;width:100%;text-align:left;">
+      <div class="bat-num-row"><span class="bat-num">01</span><p><b>오프닝</b> · GWP 취지 공유</p></div>
+      <div class="bat-num-row"><span class="bat-num">02</span><p><b>파트별 핸즈온</b> · AI 생산성 아이템 + 미니 게임 제작</p></div>
+      <div class="bat-num-row"><span class="bat-num">03</span><p><b>시연 &amp; 베스트 시상</b> · 파트별 결과물 발표</p></div>
+      <div class="bat-num-row"><span class="bat-num">04</span><p><b>파트별 석식</b> · 자율 진행</p></div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ 6. CLOSING ============ -->
 <section id="closing">
   <div class="wrap">
@@ -2393,7 +2494,7 @@
     });
 
     // 표지(커버) 페이지에서만 꽃잎/마우스 반응을 살림
-    const COVERS=new Set(['intro','farewell','battery','ai','cmfax','closing']);
+    const COVERS=new Set(['intro','farewell','battery','ai','cmfax','gwp','closing']);
     const canvas=document.getElementById('petals-canvas');
 
     // Active state via IO
